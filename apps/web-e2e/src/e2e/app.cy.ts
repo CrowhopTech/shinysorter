@@ -1,6 +1,6 @@
 import { getGreeting } from '../support/app.po';
 
-describe('shinysorter-web', () => {
+describe('web', () => {
   beforeEach(() => cy.visit('/'));
 
   it('should display welcome message', () => {
@@ -8,6 +8,6 @@ describe('shinysorter-web', () => {
     cy.login('my-email@something.com', 'myPassword');
 
     // Function helper example, see `../support/app.po.ts` file
-    getGreeting().contains('Welcome shinysorter-web');
+    getGreeting().contains('Welcome web');
   });
 });

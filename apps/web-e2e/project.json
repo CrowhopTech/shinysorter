@@ -1,19 +1,19 @@
 {
-  "name": "shinysorter-web-e2e",
+  "name": "web-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/shinysorter-web-e2e/src",
+  "sourceRoot": "apps/web-e2e/src",
   "projectType": "application",
   "targets": {
     "e2e": {
       "executor": "@nrwl/cypress:cypress",
       "options": {
-        "cypressConfig": "apps/shinysorter-web-e2e/cypress.config.ts",
-        "devServerTarget": "shinysorter-web:serve:development",
+        "cypressConfig": "apps/web-e2e/cypress.config.ts",
+        "devServerTarget": "web:serve:development",
         "testingType": "e2e"
       },
       "configurations": {
         "production": {
-          "devServerTarget": "shinysorter-web:serve:production"
+          "devServerTarget": "web:serve:production"
         }
       }
     },
@@ -21,10 +21,10 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/shinysorter-web-e2e/**/*.{js,ts}"]
+        "lintFilePatterns": ["apps/web-e2e/**/*.{js,ts}"]
       }
     }
   },
   "tags": [],
-  "implicitDependencies": ["shinysorter-web"]
+  "implicitDependencies": ["web"]
 }

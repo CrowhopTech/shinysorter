@@ -1,25 +1,22 @@
 {
-  "name": "shinysorter-web",
+  "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/shinysorter-web/src",
+  "sourceRoot": "apps/web/src",
   "prefix": "shinysorter",
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/shinysorter-web",
-        "index": "apps/shinysorter-web/src/index.html",
-        "main": "apps/shinysorter-web/src/main.ts",
+        "outputPath": "dist/apps/web",
+        "index": "apps/web/src/index.html",
+        "main": "apps/web/src/main.ts",
         "polyfills": ["zone.js"],
-        "tsConfig": "apps/shinysorter-web/tsconfig.app.json",
+        "tsConfig": "apps/web/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": [
-          "apps/shinysorter-web/src/favicon.ico",
-          "apps/shinysorter-web/src/assets"
-        ],
-        "styles": ["apps/shinysorter-web/src/styles.scss"],
+        "assets": ["apps/web/src/favicon.ico", "apps/web/src/assets"],
+        "styles": ["apps/web/src/styles.scss"],
         "scripts": []
       },
       "configurations": {
@@ -53,35 +50,35 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "browserTarget": "shinysorter-web:build:production"
+          "browserTarget": "web:build:production"
         },
         "development": {
-          "browserTarget": "shinysorter-web:build:development"
+          "browserTarget": "web:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "apps/web/proxy.conf.json"
+      }
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "browserTarget": "shinysorter-web:build"
+        "browserTarget": "web:build"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/shinysorter-web/**/*.ts",
-          "apps/shinysorter-web/**/*.html"
-        ]
+        "lintFilePatterns": ["apps/web/**/*.ts", "apps/web/**/*.html"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/shinysorter-web/jest.config.ts",
+        "jestConfig": "apps/web/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
