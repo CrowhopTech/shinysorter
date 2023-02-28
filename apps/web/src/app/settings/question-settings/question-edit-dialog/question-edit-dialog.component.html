@@ -1,0 +1,56 @@
+<mat-dialog-content #mainDialog>
+    <div class="widener"></div>
+    <h1>Edit Question</h1>
+    <form class="flex flex-col overflow-hidden">
+        <mat-form-field appearance="fill">
+            <mat-label>Question Text</mat-label>
+            <div class="flex flex-row">
+                <input matInput [(ngModel)]="questionCopy.questionText" name="questionText" #questionText="ngModel"
+                    required placeholder="Ex. 'What kind of flower is in this picture?'">
+                <button mat-icon-button (click)="questionCopy.questionText = data.question.questionText">
+                    <mat-icon>settings_backup_restore</mat-icon>
+                </button>
+            </div>
+            <mat-error *ngIf="questionText.invalid && (questionText.dirty || questionText.touched)">
+                Question Text is <strong>required</strong>
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Question Description</mat-label>
+            <div class="flex flex-row">
+                <input matInput [(ngModel)]="questionCopy.description" name="description" #questionText="ngModel">
+                <button mat-icon-button (click)="questionCopy.description = data.question.description">
+                    <mat-icon>settings_backup_restore</mat-icon>
+                </button>
+            </div>
+        </mat-form-field>
+
+        <div class="flex flex-row">
+            <mat-slide-toggle class="mt-2 mr-1" disableRipple (change)="mutexChange($event)"
+                [checked]="questionCopy.mutuallyExclusive">
+                {{mutexString}}
+            </mat-slide-toggle>
+
+            <button mat-icon-button (click)="questionCopy.mutuallyExclusive = data.question.mutuallyExclusive">
+                <mat-icon>settings_backup_restore</mat-icon>
+            </button>
+        </div>
+
+        <div *ngFor="let tagOption of questionOptionsCopy" class="my-1">
+            <app-tag-option-edit [tagOption]="tagOption" [tags]="tags" (removeTag)="removeTag($event)">
+            </app-tag-option-edit>
+        </div>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="flex flex-row">
+    <button mat-button class="w-36" (click)="addOption()">
+        <mat-icon>add</mat-icon>Add option
+    </button>
+    <div class="flex-grow"></div>
+    <button mat-button [mat-dialog-close]="undefined" cdkFocusInitial>
+        <mat-icon>cancel</mat-icon> Cancel
+    </button>
+    <button mat-button [mat-dialog-close]="{question: questionCopy, options: questionOptionsCopy}">
+        <mat-icon>save</mat-icon> Save
+    </button>
+</mat-dialog-actions>

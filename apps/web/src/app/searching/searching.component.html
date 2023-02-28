@@ -1,0 +1,71 @@
+<!-- Outer div necessary to keep everything nicely vertically aligned -->
+<div class="h-full flex flex-col">
+    <div id="image-viewer-root" class="w-full h-full fixed"
+        *ngIf="queryManager.viewingFileID != -1 && queryManager.viewingFile">
+        <button mat-icon-button disableRipple class="viewer-button absolute right-2 top-2"
+            (click)="queryManager.viewClose()">
+            <mat-icon>close</mat-icon>
+        </button>
+        <button mat-icon-button disableRipple class="viewer-button absolute left-2 top-2"
+            (click)="viewerInfoOpen = !viewerInfoOpen">
+            <mat-icon color="{{ viewerInfoOpen ? 'accent' : '' }}">info</mat-icon>
+        </button>
+        <button mat-icon-button disableRipple class="viewer-button absolute left-16 top-2"
+            (click)="supaService.downloadFileContents(queryManager.viewingFile.filename)">
+            <mat-icon>download</mat-icon>
+        </button>
+        <div id="info-bar" [class.viewer-open]="viewerInfoOpen" class="fixed w-full text-white">
+            <div class="relative left-28 p-3 flex flex-col">
+                <h1>{{ queryManager.viewingFile.filename }}</h1>
+                <div *ngIf="queryManager.viewingFile != undefined">
+                    <app-tag-chip [tagIDs]="currentFileTags"></app-tag-chip>
+                </div>
+            </div>
+        </div>
+        <app-fileviewer class="w-full h-full text-white" [fileID]="queryManager.viewingFileID">
+        </app-fileviewer>
+    </div>
+    <app-toolbar class="flex-0" (onTagClick)="router.navigate(['/tag'])"
+        (onSettingsClick)="router.navigate(['/settings'])" [currentMode]="'Searching'"></app-toolbar>
+    <mat-sidenav-container class=" flex-grow" disableClose>
+        <mat-sidenav opened="true" mode="side" class="min-w-fit w-fit p-3">
+            <app-searchinput (queryChanged)="this.queryManager.navigateToQuery($event)" [query]="queryManager.query">
+            </app-searchinput>
+            <mat-divider></mat-divider>
+        </mat-sidenav>
+        <mat-sidenav-content class="p-3">
+            <div class="flex flex-row items-end">
+                <h1>Results</h1>
+                <h3 *ngIf="queryManager.resultsCount != undefined" class="ml-1.5">
+                    (<span
+                        *ngIf="queryManager.searchResult && queryManager.searchResult.length > 0">1-{{queryManager.searchResult.length}}
+                        of </span>{{ queryManager.resultsCount }})
+                </h3>
+            </div>
+            <mat-spinner *ngIf="queryManager.searchResult === undefined" diameter="50"></mat-spinner>
+            <h2
+                *ngIf="queryManager.searchError === undefined && queryManager.searchResult !== undefined && queryManager.searchResult.length == 0">
+                No results
+            </h2>
+            <h2 *ngIf="queryManager.searchError !== undefined">
+                Failed to get results: <code>{{ queryManager.searchError }}</code>
+            </h2>
+            <mat-grid-list *ngIf="queryManager.searchResult != undefined" cols="4" rowHeight="256">
+                <mat-grid-tile *ngFor="let file of queryManager.searchResult">
+                    <img class="h-full max-h-72 m-0 object-scale-down hover:scale-95 transition-all cursor-pointer"
+                        [src]="supaService.thumbContentsAddress(file.storageID)"
+                        (click)="queryManager.viewFile(file.id)" />
+                </mat-grid-tile>
+            </mat-grid-list>
+            <button
+                *ngIf="!queryManager.searchRequestInFlight() && queryManager.searchResult != undefined && queryManager.searchResult.length > 0 && queryManager.searchError == undefined && !queryManager.noMoreResults"
+                mat-flat-button class="m-1" color="primary" (click)="queryManager.getMoreResults()">
+                Load More Results
+                <mat-icon>expand_more</mat-icon>
+            </button>
+            <h1
+                *ngIf="!queryManager.searchRequestInFlight() && queryManager.searchError == undefined && queryManager.noMoreResults">
+                No more results</h1>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</div>

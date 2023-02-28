@@ -1,0 +1,38 @@
+<mat-spinner *ngIf="question === undefined" diameter="50"></mat-spinner>
+<div *ngIf="question && question.id !== -1">
+    <h1>{{question.questionText}}</h1>
+    <div *ngIf="question.description" class="pb-3 text-base">
+        {{question.description}}
+    </div>
+    <mat-radio-group *ngIf="question.mutuallyExclusive" class="flex flex-col">
+        <mat-radio-button disableRipple class="py-1 text-base" value="-1" (change)="radioChanged($event)"
+            [checked]="isTagChecked(-1)">
+            (none)</mat-radio-button>
+        <mat-radio-button *ngFor="let option of question.questionoptions" disableRipple class="py-1 text-base"
+            value="{{option.tagid}}" (change)="radioChanged($event)" [checked]="isTagChecked(option.tagid)">
+            <span>
+                {{option.optiontext}} <mat-icon *ngIf="option.description" class="align-bottom scale-75"
+                    [matTooltip]="option.description ? option.description : ''" matTooltipPosition="right"
+                    matTooltipClass="text-base">help</mat-icon>
+            </span>
+        </mat-radio-button>
+    </mat-radio-group>
+    <div *ngIf="!question.mutuallyExclusive" class="flex flex-col">
+        <mat-checkbox disableRipple class="py-1 text-base" *ngFor="let option of question.questionoptions"
+            value="{{option.tagid}}" (change)="checkboxChanged(option.tagid)($event)"
+            [checked]="isTagChecked(option.tagid)">
+            <span>
+                {{option.optiontext}} <mat-icon *ngIf="option.description" class="align-bottom scale-75"
+                    [matTooltip]="option.description ? option.description : ''" matTooltipPosition="right"
+                    matTooltipClass="text-base">help</mat-icon>
+            </span>
+        </mat-checkbox>
+    </div>
+</div>
+<div *ngIf="question === null" class="flex flex-col">
+    <div class="my-36 flex justify-center">
+        <mat-icon class="complete-icon">check_circle</mat-icon>
+    </div>
+    <h1>All questions answered!</h1>
+    <h2>Review the tags and submit, or go back and change your answers</h2>
+</div>

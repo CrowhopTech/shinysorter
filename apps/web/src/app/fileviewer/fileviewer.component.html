@@ -1,0 +1,16 @@
+<div class="flex flex-col justify-center items-center text-center h-full">
+    <video *ngIf="getFileType() == 'video' && file" controls loop class="object-contain h-full w-full"
+        oncanplay="this.muted = true; this.play();">
+        <source src="{{ supaService.fileContentsAddress(file.filename) }}" type="video/mp4">
+    </video>
+    <img *ngIf="getFileType() == 'image' && file" src="{{ supaService.fileContentsAddress(file.filename) }}"
+        class="object-contain h-full w-full" />
+
+    <h1 *ngIf="fileError === undefined && imageNotFound == false && getFileType()=='unknown'">Unknown MIME type '{{
+        file?.mimeType }}' for file ID {{ fileID }},
+        can't render!</h1>
+    <h1 *ngIf="imageNotFound">File '{{ fileID }}' not found!</h1>
+    <h1 *ngIf="fileError !== undefined" class="w-full">Failed to get image '{{ fileID }}':
+        <code>{{ fileError }}</code>
+    </h1>
+</div>

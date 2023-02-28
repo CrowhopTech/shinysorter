@@ -1,0 +1,52 @@
+<mat-card class="h-full w-full">
+    <div *ngIf="tag" class="flex flex-row">
+        <mat-spinner class="m-3" *ngIf="savePending"></mat-spinner>
+        <div class="flex-grow pt-3 px-3">
+            <form>
+                <!-- Name tag -->
+                <div *ngIf="!editing && !savePending" class="w-fit py-2 px-6 text-xl rounded-full mb-1.5"
+                    [style.background-color]="pastelColorForText(tag.name)">
+                    <b>{{ tag.name }}</b>
+                </div>
+                <mat-form-field *ngIf="editing && !savePending" class="" appearance="fill">
+                    <mat-label>Tag Display Name</mat-label>
+                    <input matInput [(ngModel)]="newName" name="name" #name="ngModel" required placeholder="Ex. 'Rose'">
+                    <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
+                        Display Name is <strong>required</strong>
+                    </mat-error>
+                </mat-form-field>
+                <br />
+                <div *ngIf="!editing && !savePending">
+                    <mat-card-content *ngIf="tag.description && tag.description.length > 0" class="my-1">
+                        {{ tag.description }}
+                    </mat-card-content>
+                    <mat-card-content *ngIf="!tag.description || tag.description.length == 0" class="my-1">
+                        <i>No description</i>
+                    </mat-card-content>
+                </div>
+                <mat-form-field *ngIf="editing && !savePending" class="w-full" appearance="fill">
+                    <mat-label>Tag Description</mat-label>
+                    <textarea matInput [(ngModel)]="newDescription" name="description"
+                        placeholder="Ex. 'This image has a rose in it'"></textarea>
+                </mat-form-field>
+            </form>
+        </div>
+        <div class="flex-grow-0 flex flex-col">
+            <button *ngIf="!editing" mat-icon-button class="button-hover" (click)="editing=true">
+                <mat-icon>edit</mat-icon>
+            </button>
+            <button *ngIf="!editing" mat-icon-button class="button-hover" (click)="deleteTag()">
+                <mat-icon>delete</mat-icon>
+            </button>
+            <button *ngIf="editing" mat-icon-button class="button-hover" (click)="submitChanges()">
+                <mat-icon>check</mat-icon>
+            </button>
+            <button *ngIf="editing" mat-icon-button class="button-hover" (click)="resetValues()">
+                <mat-icon>replay</mat-icon>
+            </button>
+            <button *ngIf="editing" mat-icon-button class="button-hover" (click)="editing=false">
+                <mat-icon>not_interested</mat-icon>
+            </button>
+        </div>
+    </div>
+</mat-card>

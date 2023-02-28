@@ -1,0 +1,19 @@
+<mat-dialog-content>
+    <h1>Reorder this question</h1>
+    <h2>"{{ data.reorderQuestion.questionText }}"</h2>
+    <mat-divider></mat-divider>
+    <h3>Show this question after...</h3>
+    <mat-select *ngIf="questions" class="w-full" [value]="selectedQuestionIndex"
+        (selectionChange)="questionPrecursorChanged($event)">
+        <mat-option [value]="-1">(show this question first)</mat-option>
+        <div *ngFor="let question of questionsBackup">
+            <mat-option *ngIf="question.id != data.reorderQuestion.id" [value]="question.id">
+                {{question.questionText}}
+            </mat-option>
+        </div>
+    </mat-select>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="undefined">Cancel</button>
+    <button mat-button [mat-dialog-close]="this.questions" cdkFocusInitial>Reorder</button>
+</mat-dialog-actions>

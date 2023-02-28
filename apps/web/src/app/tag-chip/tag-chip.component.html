@@ -1,0 +1,13 @@
+<div *ngIf="apiUtility.tagsFetchError != undefined">
+    Failed to fetch tags: {{ apiUtility.tagsFetchError }}
+</div>
+<div *ngIf="noTagsMessage != undefined && tagIDs != undefined && tagIDs.length == 0">
+    {{ noTagsMessage }}
+</div>
+<mat-chip-list *ngIf="tagIDs != undefined && tagIDs.length > 0">
+    <div *ngFor="let tagID of tagIDs">
+        <mat-chip *ngIf="apiUtility.getTagName(tagID) != ''"
+            [style.background-color]="pastelColorForText(apiUtility.getTagName(tagID))">
+            {{apiUtility.getTagName(tagID)}}</mat-chip>
+    </div>
+</mat-chip-list>

@@ -1,0 +1,7 @@
+<mat-dialog-content>
+    Are you sure you want to delete the tag <b>{{ data.tagName }}</b>?
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="false" cdkFocusInitial>Cancel</button>
+    <button mat-button [mat-dialog-close]="true">Delete</button>
+</mat-dialog-actions>

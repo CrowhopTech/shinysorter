@@ -1,0 +1,47 @@
+<!-- Outer div necessary to keep everything nicely vertically aligned -->
+<div class="h-full flex flex-col">
+    <app-toolbar class="flex-0" (onSearchClick)="toolbarNavigate('/search')"
+        (onSettingsClick)="toolbarNavigate('/settings')" [currentMode]="'Tagging'">
+    </app-toolbar>
+    <div class="h-full flex flex-col items-center justify-center"
+        *ngIf="questionManager.currentFileID === undefined && !noMoreFiles">
+        <mat-spinner class="m-10" *ngIf="navigateError === undefined"></mat-spinner>
+        <h1 *ngIf="navigateError === undefined">Getting an image to tag...</h1>
+        <h1 *ngIf="navigateError !== undefined">Failed to get a new image to tag: <code>{{ navigateError }}</code></h1>
+    </div>
+    <div class="h-full flex flex-col items-center justify-center" *ngIf="noMoreFiles">
+        <mat-icon class="complete-icon">check_circle</mat-icon>
+        <div class="h-24"></div>
+        <h1>No more files to tag!</h1>
+        <h2>Check back later when more files have been uploaded</h2>
+    </div>
+    <mat-sidenav-container class="flex-grow" *ngIf="questionManager.currentFileID !== undefined">
+        <mat-sidenav opened="true" mode="side" class="sidebar w-fit p-3 max-w-lg">
+            <h1>Questions and tag selection</h1>
+            <app-tag-chip [tagIDs]="questionManager.selectedTags"></app-tag-chip>
+            <i *ngIf="questionManager.selectedTags.length == 0">No tags selected yet</i>
+            <mat-progress-bar value="{{questionManager.completionPercentage}}" class="py-3"></mat-progress-bar>
+            <mat-divider class="my-3"></mat-divider>
+            <h1 *ngIf="questionManager.fetchErr !== undefined">Failed to get question:
+                <code>{{ questionManager.fetchErr }}</code>
+            </h1>
+            <app-question *ngIf="questionManager.fetchErr === undefined" [question]="questionManager.currentQuestion"
+                (tagAdded)="tagAdded($event)" (tagRemoved)="tagRemoved($event)"
+                [selectedTags]="questionManager.selectedTags">
+            </app-question>
+            <div class="flex flex-row-reverse py-3">
+                <button mat-raised-button class="mx-1 flex-grow-0" color="primary" (click)="nextQuestion()">
+                    {{questionManager.completionPercentage == 100 ? "Submit" : "Next Question"}}
+                </button>
+                <button mat-raised-button class="mx-1 flex-grow-0" color="basic" (click)="prevQuestion()">Back</button>
+                <div class="flex-grow"></div>
+                <button mat-raised-button class="mx-1 flex-grow-0" color="basic" (click)="questionManager.nextFile()">
+                    Skip This Image
+                </button>
+            </div>
+        </mat-sidenav>
+        <mat-sidenav-content class="p-3">
+            <app-fileviewer [fileID]="questionManager.currentFileID"></app-fileviewer>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</div>

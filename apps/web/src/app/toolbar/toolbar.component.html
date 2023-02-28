@@ -1,0 +1,21 @@
+<mat-toolbar color="primary">
+    <h1>Shiny Sorter</h1>
+
+    <div class="w-6"></div>
+
+    <button mat-icon-button (click)="setMode('Tagging')">
+        <mat-icon color="accent" [class.deselected]="currentMode!=='Tagging'">sell</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setMode('Searching')">
+        <mat-icon color="accent" [class.deselected]="currentMode!=='Searching'">search</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setMode('Settings')">
+        <mat-icon color="accent" [class.deselected]="currentMode!=='Settings'">settings</mat-icon>
+    </button>
+
+    <div class="w-6"></div>
+
+    <h1 *ngIf="currentMode==='Searching'">Image Search</h1>
+    <h1 *ngIf="currentMode==='Tagging'">Image Tagging</h1>
+    <h1 *ngIf="currentMode==='Settings'">Settings</h1>
+</mat-toolbar>

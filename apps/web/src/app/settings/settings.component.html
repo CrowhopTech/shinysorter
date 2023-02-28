@@ -1,0 +1,14 @@
+<!-- Outer div necessary to keep everything nicely vertically aligned -->
+<div class="h-full flex flex-col">
+    <app-toolbar class="flex-0" (onSearchClick)="router.navigate(['/search'])" (onTagClick)="router.navigate(['/tag'])"
+        [currentMode]="'Settings'"></app-toolbar>
+
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+        <a mat-tab-link (click)="router.navigate(['/settings/tags'])" [active]="router.url == '/settings/tags'">Tags</a>
+        <a mat-tab-link (click)="router.navigate(['/settings/questions'])"
+            [active]="router.url == '/settings/questions'">Questions</a>
+    </nav>
+    <mat-tab-nav-panel #tabPanel class="p-3">
+        <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
+</div>

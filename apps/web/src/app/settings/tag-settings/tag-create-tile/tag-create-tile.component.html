@@ -1,0 +1,33 @@
+<mat-card class="h-full w-full" [class.new-tag-button]="!editing">
+    <mat-spinner class="m-3" *ngIf="savePending"></mat-spinner>
+    <div *ngIf="!editing" class="px-3 pt-3 pb-1 w-full h-full" (click)="editing=true">
+        <mat-card-title>Add a new tag</mat-card-title>
+    </div>
+    <div *ngIf="editing" class="flex flex-row">
+        <div class="flex-grow pt-3 px-3">
+            <form>
+                <mat-form-field *ngIf="editing && !savePending" class="" appearance="fill">
+                    <mat-label>Tag Display Name</mat-label>
+                    <input matInput [(ngModel)]="newName" name="name" #name="ngModel" required placeholder="Ex. 'Rose'">
+                    <mat-error *ngIf="name.invalid && (name.dirty || name.touched)">
+                        Display Name is <strong>required</strong>
+                    </mat-error>
+                </mat-form-field>
+                <br />
+                <mat-form-field *ngIf="editing && !savePending" class="w-full" appearance="fill">
+                    <mat-label>Tag Description</mat-label>
+                    <textarea matInput [(ngModel)]="newDescription" name="description"
+                        placeholder="Ex. 'This image has a rose in it'"></textarea>
+                </mat-form-field>
+            </form>
+        </div>
+        <div class="flex-grow-0 flex flex-col">
+            <button mat-icon-button class="button-hover" (click)="submitChanges()" enabled="newName?.length > 0">
+                <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button class="button-hover" (click)="editing=false">
+                <mat-icon>not_interested</mat-icon>
+            </button>
+        </div>
+    </div>
+</mat-card>

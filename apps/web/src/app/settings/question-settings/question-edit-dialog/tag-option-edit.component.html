@@ -1,0 +1,22 @@
+<div class="flex flex-row" *ngIf="tagOption">
+    <mat-form-field appearance="fill" class="flex-grow-0 w-min h-full">
+        <mat-select [value]="tagOption ? tagOption.tagid : -1" (selectionChange)="tagChange($event)">
+            <mat-option *ngFor="let tag of tags" [value]="tag.id">{{ tag.name }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="flex-grow">
+        <input matInput #optionText required [value]="tagOption.optiontext" (change)="optionTextChange($event)">
+        <mat-error *ngIf="tagOption.optiontext && tagOption.optiontext.length == 0">
+            Option Text is <strong>required</strong>
+        </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="flex-grow">
+        <input matInput #optionText required [value]="tagOption.description" (change)="optionDescriptionChange($event)">
+    </mat-form-field>
+    <button mat-icon-button (click)="resetOption()">
+        <mat-icon>settings_backup_restore</mat-icon>
+    </button>
+    <button mat-icon-button (click)="tagOption.tagid != null && removeTag.emit(tagOption.tagid)">
+        <mat-icon>delete</mat-icon>
+    </button>
+</div>

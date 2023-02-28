@@ -1,0 +1,17 @@
+<h1>Edit tags</h1>
+<mat-spinner *ngIf="tags == undefined">
+</mat-spinner>
+<div *ngIf="tags != undefined">
+    <div class="flex flex-row flex-wrap">
+        <div *ngFor="let tag of tags">
+            <div class="card">
+                <app-tag-tile [tag]="tag" (refetchRequired)="refetchTags()"></app-tag-tile>
+            </div>
+        </div>
+        <div>
+            <div class="card">
+                <app-tag-create-tile (refetchRequired)="refetchTags()"></app-tag-create-tile>
+            </div>
+        </div>
+    </div>
+</div>

@@ -42,3 +42,14 @@ router.use((req, res, next) => {
 const httpServer = http.createServer(router);
 const PORT: any = process.env.PORT ?? 6060;
 httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+
+process.on('SIGTERM', code => {
+    // Only synchronous calls
+    httpServer.close();
+    console.log(`Process received SIGTERM`);
+});
+process.on('SIGINT', code => {
+    // Only synchronous calls
+    httpServer.close();
+    console.log(`Process received SIGINT`);
+});

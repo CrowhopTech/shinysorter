@@ -6,13 +6,41 @@
   "targets": {
     "build": {
       "executor": "@nrwl/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/importer",
-        "format": ["cjs"],
+        "format": [
+          "cjs"
+        ],
         "main": "apps/importer/src/main.ts",
         "tsConfig": "apps/importer/tsconfig.app.json",
-        "assets": ["apps/importer/src/assets"]
+        "assets": [
+          "apps/importer/src/assets"
+        ]
+      }
+    },
+    "docker-build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker build -f apps/importer/Dockerfile . -t $DOCKER_IMG:$DOCKER_TAG"
+        ]
+      }
+    },
+    "docker-push": {
+      "dependsOn": [
+        "^docker-build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker push $DOCKER_IMG:$DOCKER_TAG"
+        ]
       }
     },
     "serve": {
@@ -28,14 +56,20 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/importer/**/*.ts"]
+        "lintFilePatterns": [
+          "apps/importer/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/importer/jest.config.ts",
         "passWithNoTests": true

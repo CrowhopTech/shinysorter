@@ -1,0 +1,39 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header *ngIf="question">
+        <mat-panel-title>
+            <b class="mr-3">{{ question.questionText }}</b>{{ question.description}}
+        </mat-panel-title>
+        <mat-panel-description>
+            {{ question.questionoptions.length }} options,
+            {{ question.mutuallyExclusive ? 'select one' : 'select multiple' }}
+            <app-tag-chip [tagIDs]="questionTagIDs" class="ml-3"></app-tag-chip>
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+    <div *ngIf="question" class="flex flex-row">
+        <div class="flex-grow">
+            <h3>Options</h3>
+            <div *ngFor="let tagOption of question.questionoptions" class="flex flex-row my-1">
+                <app-tag-chip *ngIf="tagOption.tagid" [tagIDs]="[tagOption.tagid]" class="inline"></app-tag-chip>
+                <span class="ml-0.5 mt-1.5" *ngIf="apiUtility.getTagName(tagOption.tagid) != tagOption.optiontext">
+                    : <b>{{tagOption.optiontext}}</b>
+                </span>
+                <span class="ml-3 mt-1.5">
+                    <mat-icon class="scale-75 align-middle">help</mat-icon> {{tagOption.description}}
+                </span>
+            </div>
+        </div>
+        <div class="flex-grow-0 flex flex-col-reverse">
+            <div class="flex flex-col">
+                <button mat-button (click)="editQuestion()" class="text-left">
+                    <mat-icon>edit</mat-icon> Edit Question
+                </button>
+                <button mat-button class="text-left" (click)="showReorderDialog()">
+                    <mat-icon>low_priority</mat-icon> Reorder Question
+                </button>
+                <button mat-button class="text-left" (click)="showDeleteDialog()">
+                    <mat-icon>delete</mat-icon> Delete Question
+                </button>
+            </div>
+        </div>
+    </div>
+</mat-expansion-panel>

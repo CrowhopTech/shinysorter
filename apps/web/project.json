@@ -7,16 +7,32 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "inputs": [
+        "{projectRoot}/app",
+        "{projectRoot}/assets/app.config.json",
+        "{projectRoot}/styles.sass"
+      ],
       "options": {
         "outputPath": "dist/apps/web",
         "index": "apps/web/src/index.html",
         "main": "apps/web/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/web/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
-        "assets": ["apps/web/src/favicon.ico", "apps/web/src/assets"],
-        "styles": ["apps/web/src/styles.scss"],
+        "inlineStyleLanguage": "sass",
+        "assets": [
+          "apps/web/src/favicon.ico",
+          "apps/web/src/assets"
+        ],
+        "styles": [
+          "apps/web/src/styles.sass",
+          "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
+        ],
+        "baseHref": "/replacemebasehref/",
         "scripts": []
       },
       "configurations": {
@@ -46,6 +62,28 @@
       },
       "defaultConfiguration": "production"
     },
+    "docker-build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker build -f apps/web/Dockerfile . -t $DOCKER_IMG:$DOCKER_TAG"
+        ]
+      }
+    },
+    "docker-push": {
+      "dependsOn": [
+        "^docker-build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker push $DOCKER_IMG:$DOCKER_TAG"
+        ]
+      }
+    },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
@@ -69,14 +107,21 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/web/**/*.ts", "apps/web/**/*.html"]
+        "lintFilePatterns": [
+          "apps/web/**/*.ts",
+          "apps/web/**/*.html"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/web/jest.config.ts",
         "passWithNoTests": true
