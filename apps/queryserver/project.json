@@ -28,7 +28,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "docker build -f apps/queryserver/Dockerfile . -t $DOCKER_IMG:$DOCKER_TAG"
+          "docker build -f apps/queryserver/Dockerfile . -t $QUERYSERVER_DOCKER_IMG:$QUERYSERVER_DOCKER_TAG"
         ]
       }
     },
@@ -39,7 +39,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "docker push $DOCKER_IMG:$DOCKER_TAG"
+          "docker push $QUERYSERVER_DOCKER_IMG:$QUERYSERVER_DOCKER_TAG"
         ]
       }
     },
