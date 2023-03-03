@@ -33,6 +33,15 @@
         "^production"
       ]
     },
+    "docker-push": {
+      "dependsOn": [
+        "^docker-build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
+    },
     "test": {
       "inputs": [
         "default",
