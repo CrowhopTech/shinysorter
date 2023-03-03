@@ -1,0 +1,73 @@
+reclaimPolicy: Retain
+
+webdav:
+  nameOverride: "shinysorter-importdir-webdav"
+  urls:
+    /importdir:
+      - user: user1
+        password: password1
+  service:
+    type: ClusterIP
+    port: 80
+  persistence:
+    enabled: true
+    type: pvc
+    existingClaim: shinysorter-importdir
+  ingress:
+    host: ""
+
+importer:
+  image: "adamukaapan/shinysorter-importer"
+  tag: "alpha-v0.3.1"
+  importSubdirectory: ""
+  nodeSelector: null
+  tolerations: null
+
+frontend:
+  image: "adamukaapan/shinysorter-frontend-angular"
+  tag: "alpha-v0.3.1"
+  prefix: ""
+  nodeSelector: null
+  tolerations: null
+
+queryServer:
+  image: "adamukaapan/shinysorter-query-server"
+  tag: "alpha-v0.3.1"
+  prefix: ""
+  nodeSelector: null
+  tolerations: null
+
+supabase:
+  address: ""
+  jwtSecret: ""
+  anonKey: ""
+  serviceKey: ""
+  postgresql:
+    address: "" # Temporary hack
+    password: ""
+    port: 31415
+    nodeSelector: null
+    tolerations: null
+  studio:
+    port: 3000
+    nodeSelector: null
+    tolerations: null
+  rest:
+    nodeSelector: null
+    tolerations: null
+  auth:
+    nodeSelector: null
+    tolerations: null
+  realtime:
+    nodeSelector: null
+    tolerations: null
+  storage:
+    nodeSelector: null
+    tolerations: null
+  meta:
+    nodeSelector: null
+    tolerations: null
+  kong:
+    port: 8000
+    nodeSelector: null
+    tolerations: null

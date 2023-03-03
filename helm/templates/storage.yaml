@@ -1,0 +1,75 @@
+### storage.yaml
+# Contains the storage definitions for the project. Powered by Portworx, but
+# can work with anything providing ReadWriteMany capabilities
+###
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: shinysorter-importdir-sc
+  annotations:
+    helm.sh/hook: pre-install
+provisioner: pxd.portworx.com
+reclaimPolicy: {{ .Values.reclaimPolicy }}
+parameters:
+  repl: "1"
+  sharedv4: "true"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: shinysorter-importdir
+spec:
+  storageClassName: shinysorter-importdir-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: shinysorter-supastoragedir-sc
+  annotations:
+    helm.sh/hook: pre-install
+provisioner: pxd.portworx.com
+reclaimPolicy: {{ .Values.reclaimPolicy }}
+parameters:
+  repl: "1"
+  fs: "ext4"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: shinysorter-supastoragedir
+spec:
+  storageClassName: shinysorter-supastoragedir-sc
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: shinysorter-supabase-postgres-data-sc
+  annotations:
+    helm.sh/hook: pre-install
+provisioner: pxd.portworx.com
+reclaimPolicy: {{ .Values.reclaimPolicy }}
+parameters:
+  repl: "1"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: shinysorter-supabase-postgres-data
+spec:
+  storageClassName: shinysorter-supabase-postgres-data-sc
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

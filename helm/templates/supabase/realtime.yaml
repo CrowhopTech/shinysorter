@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-supabase-realtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-realtime
+  template:
+    metadata:
+      labels:
+        app: supabase-realtime
+    spec:
+      {{ with .Values.supabase.realtime }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-postgres {{ .Values.supabase.postgresql.port }} > /dev/null; do echo Waiting for postgres.; sleep 2; done; echo 'PostgreSQL is up'"]
+      containers:
+      - name: realtime
+        image: supabase/realtime:v0.25.1
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - -c
+        - "./prod/rel/realtime/bin/realtime eval Realtime.Release.migrate && ./prod/rel/realtime/bin/realtime start"
+        env:
+        - name: DB_HOST
+          value: {{ .Values.supabase.postgresql.address }}
+        - name: DB_PORT
+          value: "{{ .Values.supabase.postgresql.port }}"
+        - name: DB_NAME
+          value: postgres
+        - name: DB_USER
+          value: supabase_admin
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-db-credentials
+              key: postgresPassword
+        - name: DB_SSL
+          value: "false"
+        - name: PORT
+          value: "4000"
+        - name: JWT_SECRET
+          value: "{{ .Values.supabase.jwtSecret }}"
+        - name: REPLICATION_MODE
+          value: RLS
+        - name: REPLICATION_POLL_INTERVAL
+          value: "100"
+        - name: SECURE_CHANNELS
+          value: "true"
+        - name: SLOT_NAME
+          value: supabase_realtime_rls
+        - name: TEMPORARY_SLOT
+          value: "true"
+        ports:
+        - name: realtime
+          containerPort: 4000
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-realtime
+spec:
+  ports:
+    - name: realtime
+      targetPort: realtime
+      port: 4000
+  selector:
+    app: supabase-realtime
+  type: ClusterIP

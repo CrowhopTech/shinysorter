@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-supabase-kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-kong
+  template:
+    metadata:
+      labels:
+        app: supabase-kong
+    spec:
+      {{ with .Values.supabase.kong }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: kong
+        image: kong:2.8.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KONG_DATABASE
+          value: "off"
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /var/lib/kong/kong.yml
+        # https://github.com/supabase/cli/issues/14
+        - name: KONG_DNS_ORDER
+          value: LAST,A,CNAME
+        - name: KONG_PLUGINS
+          value: request-transformer,cors,key-auth,acl
+        - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+          value: 160k
+        - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+          value: 64 160k
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: https
+          containerPort: 8443
+          protocol: TCP
+        volumeMounts:
+        - name: kong-cfg
+          mountPath: /var/lib/kong
+      volumes:
+        - name: kong-cfg
+          secret:
+            secretName: kong-cfg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-kong
+spec:
+  ports:
+    - name: http
+      targetPort: http
+      port: {{ .Values.supabase.kong.port }}
+  selector:
+    app: supabase-kong
+  type: LoadBalancer

@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-supabase-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-auth
+  template:
+    metadata:
+      labels:
+        app: supabase-auth
+    spec:
+      {{ with .Values.supabase.auth }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-postgres {{ .Values.supabase.postgresql.port }} > /dev/null; do echo Waiting for postgres.; sleep 2; done; echo 'PostgreSQL is up'"]
+      containers:
+      - name: auth
+        image: supabase/gotrue:v2.31.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-db-credentials
+              key: postgresPassword
+        - name: GOTRUE_API_HOST
+          value: "0.0.0.0"
+        - name: GOTRUE_API_PORT
+          value: "9999"
+        - name: API_EXTERNAL_URL
+          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+        - name: GOTRUE_DB_DRIVER
+          value: postgres
+        - name: GOTRUE_DB_DATABASE_URL
+          value: postgres://supabase_auth_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+        - name: GOTRUE_SITE_URL
+          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.studio.port }}"
+        - name: GOTRUE_URI_ALLOW_LIST
+          value: ""
+        - name: GOTRUE_DISABLE_SIGNUP
+          value: "false"
+        - name: GOTRUE_JWT_ADMIN_ROLES
+          value: "service_role"
+        - name: GOTRUE_JWT_AUD
+          value: "authenticated"
+        - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
+          value: "authenticated"
+        - name: GOTRUE_JWT_EXP
+          value: "3600"
+        - name: GOTRUE_JWT_SECRET
+          value: "{{ .Values.supabase.jwtSecret }}"
+        - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
+          value: "true"
+        - name: GOTRUE_MAILER_AUTOCONFIRM
+          value: "false"
+        - name: GOTRUE_SMTP_ADMIN_EMAIL
+          value: "admin@example.com"
+        - name: GOTRUE_SMTP_HOST
+          value: "supabase-mail"
+        - name: GOTRUE_SMTP_PORT
+          value: "2500"
+        - name: GOTRUE_SMTP_USER
+          value: "fake_mail_user"
+        - name: GOTRUE_SMTP_PASS
+          value: "fake_mail_password"
+        - name: GOTRUE_SMTP_SENDER_NAME
+          value: "fake_sender"
+        - name: GOTRUE_MAILER_URLPATHS_INVITE
+          value: "/auth/v1/verify"
+        - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+          value: "/auth/v1/verify"
+        - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+          value: "/auth/v1/verify"
+        - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+          value: "/auth/v1/verify"
+        - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+          value: "true"
+        - name: GOTRUE_SMS_AUTOCONFIRM
+          value: "true"
+        - name: MFA_ENABLED
+          value: "false"
+        ports:
+        - name: api
+          containerPort: 9999
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-auth
+spec:
+  ports:
+    - name: api
+      targetPort: api
+      port: 9999
+  selector:
+    app: supabase-auth
+  type: ClusterIP

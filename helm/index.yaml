@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  shinysorter:
+    - apiVersion: v2
+      appVersion: alpha-v0.3f.1
+      created: "2022-11-05T12:56:32.7658746-07:00"
+      dependencies:
+        - name: webdav
+          repository: https://danuk.github.io/k8s-webdav
+          version: 0.0.1
+      description: Deploys the "shiny sorter" application database and other relevant containers.
+      digest: e423c1a2afac0a66b145921a646f3c744fcffbaa805964629f52aa2bf565c2a8
+      name: shinysorter
+      type: application
+      urls:
+        - shinysorter-0.1.0.tgz
+        - shinysorter-0.2.0.tgz
+        - shinysorter-0.3.0.tgz
+        - shinysorter-0.3.1.tgz
+      version: 0.3.0
+generated: "2022-11-05T12:56:32.7597262-07:00"

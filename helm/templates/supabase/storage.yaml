@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-supabase-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-storage
+  template:
+    metadata:
+      labels:
+        app: supabase-storage
+    spec:
+      {{ with .Values.supabase.storage }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-postgres {{ .Values.supabase.postgresql.port }} > /dev/null; do echo Waiting for postgres.; sleep 2; done; echo 'PostgreSQL is up'"]
+      - name: wait-for-rest
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-rest 3000 > /dev/null; do echo Waiting for REST.; sleep 2; done; echo 'REST is up'"]
+      containers:
+      - name: storage
+        image: supabase/storage-api:v0.26.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ANON_KEY
+          value: "{{ .Values.supabase.anonKey }}"
+        - name: SERVICE_KEY
+          value: "{{ .Values.supabase.serviceKey }}"
+        - name: POSTGREST_URL
+          value: http://supabase-rest:3000
+        - name: PGRST_JWT_SECRET
+          value: "{{ .Values.supabase.jwtSecret }}"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-db-credentials
+              key: postgresPassword
+        - name: DATABASE_URL
+          value: postgres://supabase_storage_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+        - name: FILE_SIZE_LIMIT
+          value: "52428800"
+        - name: STORAGE_BACKEND
+          value: "file"
+        - name: FILE_STORAGE_BACKEND_PATH
+          value: "/var/lib/storage"
+        - name: TENANT_ID
+          value: stub
+        # TODO (from upstream): https://github.com/supabase/storage-api/issues/55
+        - name: REGION
+          value: stub
+        - name: GLOBAL_S3_BUCKET
+          value: stub
+        - name: ENABLE_IMAGE_TRANSFORMATION
+          value: "true"
+        - name: IMGPROXY_URL
+          value: "http://localhost:5001"
+        volumeMounts:
+        - name: storage-vol
+          mountPath: /var/lib/storage
+        ports:
+        - name: storage
+          containerPort: 5000
+          protocol: TCP
+      - name: imgproxy
+        image: darthsim/imgproxy:v3.11
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: IMGPROXY_BIND
+          value: ":5001"
+        - name: IMGPROXY_LOCAL_FILESYSTEM_ROOT
+          value: "/"
+        - name: IMGPROXY_USE_ETAG
+          value: "true"
+        volumeMounts:
+        - name: storage-vol
+          mountPath: /var/lib/storage
+        ports:
+        - name: imgproxy
+          containerPort: 5001
+          protocol: TCP
+      volumes:
+        - name: storage-vol
+          persistentVolumeClaim:
+            claimName: shinysorter-supastoragedir
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-storage
+spec:
+  ports:
+    - name: storage
+      targetPort: storage
+      port: 5000
+  selector:
+    app: supabase-storage
+  type: ClusterIP

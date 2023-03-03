@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-supabase-rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-rest
+  template:
+    metadata:
+      labels:
+        app: supabase-rest
+    spec:
+      {{ with .Values.supabase.rest }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-postgres {{ .Values.supabase.postgresql.port }} > /dev/null; do echo Waiting for postgres.; sleep 2; done; echo 'PostgreSQL is up'"]
+      containers:
+      - name: rest
+        image: postgrest/postgrest:v9.0.1.20220717
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: supabase-db-credentials
+              key: postgresPassword
+        - name: PGRST_DB_URI
+          value: postgres://authenticator:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+        - name: PGRST_DB_SCHEMAS
+          value: public,storage,graphql_public
+        - name: PGRST_DB_ANON_ROLE
+          value: anon
+        - name: PGRST_JWT_SECRET
+          value: "{{ .Values.supabase.jwtSecret }}"
+        - name: PGRST_DB_USE_LEGACY_GUCS
+          value: "false"
+        ports:
+        - name: rest
+          containerPort: 3000
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-rest
+spec:
+  ports:
+    - name: rest
+      targetPort: rest
+      port: 3000
+  selector:
+    app: supabase-rest
+  type: ClusterIP

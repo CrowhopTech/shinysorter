@@ -1,0 +1,59 @@
+### importer.yaml
+# Contains the file importer for the Shiny Sorter. This takes files inserted into the given import
+# directory and will create a database entry while copying the file over to the storage directory.
+###
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-importer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: importer
+  template:
+    metadata:
+      labels:
+        app: importer
+    spec:
+      {{ with .Values.importer }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      volumes:
+        - name: importdir
+          persistentVolumeClaim:
+            claimName: shinysorter-importdir
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-postgres {{ .Values.supabase.postgresql.port }} > /dev/null; do echo Waiting for postgres.; sleep 2; done; echo 'PostgreSQL is up'"]
+      - name: wait-for-storage
+        image: busybox
+        command:  ["sh", "-c", "until nc -w 5 -z supabase-storage 5000 > /dev/null; do echo Waiting for Storage.; sleep 2; done; echo 'Storage is up'"]
+      containers:
+        - name: importer
+          image: "{{ .Values.importer.image }}:{{ .Values.importer.tag }}"
+          imagePullPolicy: Always
+          env:
+            - name: SUPABASE_ADDRESS
+              value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+            - name: SUPABASE_KEY
+              value: "{{ .Values.supabase.anonKey }}"
+            - name: BUCKET_NAME
+              value: "files"
+            - name: THUMBS_BUCKET_NAME
+              value: "thumbs"
+            - name: IMPORT_DIRECTORY
+              value: "/import{{ .Values.importer.importSubdirectory }}"
+          volumeMounts:
+            - mountPath: /import
+              name: importdir

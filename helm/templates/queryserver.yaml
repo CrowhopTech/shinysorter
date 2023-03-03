@@ -1,0 +1,80 @@
+### queryserver.yaml
+# Contains the Query Server for the Shiny Sorter. This serves as a query helper
+# mainly to put together more complex queries to the backend database.
+# This may be replaced in the future as I learn more how to make these calls
+# safely from the frontend without an intermediary.
+###
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-queryserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: queryserver
+  template:
+    metadata:
+      labels:
+        app: queryserver
+    spec:
+      {{ with .Values.queryServer }}
+      {{ if .nodeSelector }}
+      nodeSelector:
+        {{- toYaml .nodeSelector | nindent 8}}
+      {{ end }}
+      {{ if .tolerations }}
+      tolerations:
+        {{- toYaml .tolerations | nindent 8}}
+      {{ end }}
+      {{ end }}
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: queryserver
+          image: "{{ .Values.queryServer.image }}:{{ .Values.queryServer.tag }}"
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "80"
+            - name: PG_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-db-credentials
+                  key: connectionString
+                  optional: false
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-queryserver
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+  selector:
+    app: queryserver
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-queryserver
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - http:
+      paths:
+      - path: {{ .Values.queryServer.prefix }}/?(query.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "shinysorter.fullname" . }}-queryserver
+            port:
+              number: 80
