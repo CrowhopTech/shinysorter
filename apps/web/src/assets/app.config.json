@@ -1,5 +1,5 @@
 {
-    "queryServerAddress": "http://192.168.1.5/dev/query",
-    "supabaseAddress": "http://192.168.1.128:8000",
-    "supabaseKey": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTY3NDgwMDk3OSwiZXhwIjoxODMyNDgwOTc5LCJyb2xlIjoiYW5vbiJ9.UyZUuuL0NIEstbP4rYOVCCys2U32k4CLD1qkW54C3Os"
+    "queryServerAddress": "",
+    "supabaseAddress": "",
+    "supabaseKey": ""
 }
