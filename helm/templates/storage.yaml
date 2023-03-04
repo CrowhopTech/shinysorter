@@ -19,8 +19,12 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: shinysorter-importdir
+  labels:
+    meta.helm.sh/release-name: {{ include "shinysorter.fullname" . }}
+  annotations:
+  {{- toYaml .Values.importer.storage.pvcAnnotations | nindent 4 }}
 spec:
-  storageClassName: shinysorter-importdir-sc
+  storageClassName: {{ .Values.importer.storage.storageClassName | default "shinysorter-importdir-sc" }}
   accessModes:
     - ReadWriteMany
   resources:
@@ -43,8 +47,12 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: shinysorter-supastoragedir
+  labels:
+    meta.helm.sh/release-name: {{ include "shinysorter.fullname" . }}
+  annotations:
+  {{- toYaml .Values.supabase.storage.storage.pvcAnnotations | nindent 4 }}
 spec:
-  storageClassName: shinysorter-supastoragedir-sc
+  storageClassName: {{ .Values.supabase.storage.storage.storageClassName | default "shinysorter-supastoragedir-sc" }}
   accessModes:
     - ReadWriteOnce
   resources:
@@ -66,8 +74,12 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: shinysorter-supabase-postgres-data
+  labels:
+    meta.helm.sh/release-name: {{ include "shinysorter.fullname" . }}
+  annotations:
+  {{- toYaml .Values.supabase.postgresql.storage.pvcAnnotations | nindent 4 }}
 spec:
-  storageClassName: shinysorter-supabase-postgres-data-sc
+  storageClassName: {{ .Values.supabase.postgresql.storage.storageClassName | default "shinysorter-supabase-postgres-data-sc" }}
   accessModes:
     - ReadWriteOnce
   resources:
