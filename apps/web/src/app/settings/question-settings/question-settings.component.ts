@@ -75,9 +75,17 @@ export class QuestionSettingsComponent implements OnInit {
       }
     }).afterClosed().subscribe(async (result?: { question: QuestionPatchWithOptions, options: QuestionOptionCreate[]; }) => {
       if (result) {
+        var newOrderingID;
+        if (result.question.orderingID) {
+          newOrderingID = result.question.orderingID;
+        } else if (this.questions && this.questions.length > 0) {
+          newOrderingID = this.questions[this.questions.length - 1].orderingID + 1;
+        } else {
+          newOrderingID = 0;
+        }
         const error = await this.supaService.createQuestion({
           questionText: result.question.questionText ? result.question.questionText : "",
-          orderingID: result.question.orderingID ? result.question.orderingID : -1,
+          orderingID: newOrderingID,
           mutuallyExclusive: result.question.mutuallyExclusive,
         }, result.options);
         if (error) {
