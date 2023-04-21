@@ -1,0 +1,101 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backuptool
+  template:
+    metadata:
+      labels:
+        app: backuptool
+    spec:
+      serviceAccountName: {{ include "shinysorter.fullname" . }}-backuptool
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: backup
+        image: "{{ .Values.backup.image }}:{{ .Values.backup.tag }}"
+        imagePullPolicy: Always
+        # Make this container wait forever: it's meant to be used by exec-ing into it
+        command: ["/bin/sh", "-c", "while true; do sleep 5; done"]
+        volumeMounts:
+        - name: storage-vol
+          mountPath: /supabase-storage
+        env:
+        - name: POD_NS
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      volumes:
+        - name: storage-vol
+          persistentVolumeClaim:
+            claimName: shinysorter-supastoragedir
+---
+# Create a serviceaccount for the backup tool
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+  labels:
+    app: {{ include "shinysorter.name" . }}-backuptool
+    chart: {{ include "shinysorter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+---
+# Create a role for the backup tool
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+  labels:
+    app: {{ include "shinysorter.name" . }}-backuptool
+    chart: {{ include "shinysorter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create", "get"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["apps"]
+  resources: ["deployments/scale", "statefulsets/scale"]
+  verbs: ["update", "patch"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["batch"]
+  resources: ["jobs/scale"]
+  verbs: ["update", "patch"]
+- apiGroups: ["extensions"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["extensions"]
+  resources: ["deployments/scale", "statefulsets/scale"]
+  verbs: ["update", "patch"]
+---
+# Create a rolebinding for the backup tool
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+  labels:
+    app: {{ include "shinysorter.name" . }}-backuptool
+    chart: {{ include "shinysorter.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+subjects:
+- kind: ServiceAccount
+  name: {{ include "shinysorter.fullname" . }}-backuptool
+  namespace: {{ .Release.Namespace }}

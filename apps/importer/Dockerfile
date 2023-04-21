@@ -1,6 +1,8 @@
 # https://nx.dev/node-server-tutorial/5-docker-target
 FROM docker.io/node:gallium-alpine
 
+RUN ["apk", "add", "--no-cache", "ffmpeg", "python3", "make", "gcc", "py3-magic", "lua-file-magic", "perl-file-mmagic", "libc-dev", "build-base"]
+
 WORKDIR /app
 
 RUN addgroup --system importer && \

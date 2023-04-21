@@ -128,9 +128,13 @@ function doImport(basePath: string) {
                 return;
             }
 
+            console.debug("Starting file import promise...");
+
             // Do the import, check aborts map at each step
             const filepath = path.join(importDir, basePath);
             const fileContents = fs.readFileSync(filepath);
+
+            console.debug("Successfully read file contents...");
 
             // Uncomment below if we change how we read files (if we add an await)
             // if (checkFileAborted(basePath, reject)) return;
@@ -138,10 +142,13 @@ function doImport(basePath: string) {
             const { md5sum, mimeType } = await getFileMetadata(filepath);
             var storageID: string | undefined = undefined;
 
+            console.debug("Successfully got file metadata...");
+
             if (checkFileAborted(basePath, reject)) return;
 
             // Try to upload
             const { data: uploadResult, error: uploadError } = await supabaseClient.storage.from(storageBucketName).upload(basePath, fileContents);
+            console.debug("Attempted to upload file to supabase storage...");
             if (uploadError) {
                 // If error and error not "already exists": ret error
                 if (!uploadError.message.includes("already exists")) {
@@ -168,6 +175,7 @@ function doImport(basePath: string) {
 
                 await checkFileEntryForExisting(basePath, storageID, { md5sum, mimeType });
             } else {
+                console.debug("Successfully uploaded file to supabase storage, getting created storage entry...");
                 // Get newly created storage row entry
                 const { data: newStorageResult, error: newStorageError } = await getStorageRow(uploadResult.path);
                 if (newStorageError) {
@@ -260,6 +268,7 @@ function fileAdded(basePath: string) {
     if (!runningFiles.has(basePath)) {
         // Wait for the file size to steady out first, then upload it
         debounceFileSize(basePath).then(_ => {
+            console.debug("Debounce complete, starting import...");
             doImport(basePath).then(_ => {
                 // Success: remove from promises
                 console.info(`File import for '${basePath}' promise success!`);

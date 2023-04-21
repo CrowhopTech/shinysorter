@@ -40,6 +40,10 @@ queryServer:
   nodeSelector: null
   tolerations: null
 
+backup:
+  image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-backuptool"
+  tag: "alpha-v0.3.2"
+
 supabase:
   address: ""
   jwtSecret: ""

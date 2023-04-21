@@ -1,7 +1,7 @@
 {
-  "name": "importer",
+  "name": "backuptool",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/importer/src",
+  "sourceRoot": "apps/backuptool/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -10,47 +10,25 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/apps/importer",
+        "outputPath": "dist/apps/backuptool",
         "format": [
           "cjs"
         ],
-        "main": "apps/importer/src/main.ts",
-        "tsConfig": "apps/importer/tsconfig.app.json",
+        "main": "apps/backuptool/src/main.ts",
+        "tsConfig": "apps/backuptool/tsconfig.app.json",
         "assets": [
-          "apps/importer/src/assets"
-        ]
-      }
-    },
-    "docker-build": {
-      "dependsOn": [
-        "build"
-      ],
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "docker build -f apps/importer/Dockerfile . -t $IMPORTER_DOCKER_IMG:$IMPORTER_DOCKER_TAG"
-        ]
-      }
-    },
-    "docker-push": {
-      "dependsOn": [
-        "docker-build"
-      ],
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "docker push $IMPORTER_DOCKER_IMG:$IMPORTER_DOCKER_TAG"
+          "apps/backuptool/src/assets"
         ]
       }
     },
     "serve": {
       "executor": "@nrwl/js:node",
       "options": {
-        "buildTarget": "importer:build"
+        "buildTarget": "backuptool:build"
       },
       "configurations": {
         "production": {
-          "buildTarget": "importer:build:production"
+          "buildTarget": "backuptool:build:production"
         }
       }
     },
@@ -61,7 +39,7 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "apps/importer/**/*.ts"
+          "apps/backuptool/**/*.ts"
         ]
       }
     },
@@ -71,7 +49,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "apps/importer/jest.config.ts",
+        "jestConfig": "apps/backuptool/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
@@ -80,7 +58,29 @@
           "codeCoverage": true
         }
       }
-    }
+    },
+    "docker-build": {
+      "dependsOn": [
+        "build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker build -f apps/backuptool/Dockerfile . -t $BACKUPTOOL_DOCKER_IMG:$BACKUPTOOL_DOCKER_TAG"
+        ]
+      }
+    },
+    "docker-push": {
+      "dependsOn": [
+        "docker-build"
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "docker push $BACKUPTOOL_DOCKER_IMG:$BACKUPTOOL_DOCKER_TAG"
+        ]
+      }
+    },
   },
   "tags": []
 }
