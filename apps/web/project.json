@@ -11,9 +11,9 @@
         "{options.outputPath}"
       ],
       "inputs": [
-        "{projectRoot}/app",
-        "{projectRoot}/assets/app.config.json",
-        "{projectRoot}/styles.sass"
+        "{projectRoot}/src/app",
+        "{projectRoot}/src/assets/app.config.json",
+        "{projectRoot}/src/styles.sass"
       ],
       "options": {
         "outputPath": "dist/apps/web",
@@ -64,24 +64,36 @@
     },
     "docker-build": {
       "dependsOn": [
-        "^build"
+        "build"
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/web/.env.default",
         "commands": [
           "docker build -f apps/web/Dockerfile . -t $WEB_DOCKER_IMG:$WEB_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/web/.env.production"
+        }
       }
     },
     "docker-push": {
       "dependsOn": [
-        "^docker-build"
+        "docker-build"
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/web/.env.default",
         "commands": [
           "docker push $WEB_DOCKER_IMG:$WEB_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/web/.env.production"
+        }
       }
     },
     "serve": {

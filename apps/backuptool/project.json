@@ -5,6 +5,9 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "inputs": [
+        "{projectRoot}/src/**"
+      ],
       "executor": "@nrwl/esbuild:esbuild",
       "outputs": [
         "{options.outputPath}"
@@ -65,9 +68,15 @@
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/backuptool/.env.default",
         "commands": [
           "docker build -f apps/backuptool/Dockerfile . -t $BACKUPTOOL_DOCKER_IMG:$BACKUPTOOL_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/backuptool/.env.production"
+        }
       }
     },
     "docker-push": {
@@ -76,11 +85,17 @@
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/backuptool/.env.default",
         "commands": [
           "docker push $BACKUPTOOL_DOCKER_IMG:$BACKUPTOOL_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/backuptool/.env.production"
+        }
       }
-    },
+    }
   },
   "tags": []
 }

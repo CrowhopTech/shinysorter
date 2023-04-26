@@ -9,6 +9,9 @@
       "outputs": [
         "{options.outputPath}"
       ],
+      "inputs": [
+        "{projectRoot}/src/**"
+      ],
       "options": {
         "outputPath": "dist/apps/importer",
         "format": [
@@ -27,9 +30,15 @@
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/importer/.env.default",
         "commands": [
           "docker build -f apps/importer/Dockerfile . -t $IMPORTER_DOCKER_IMG:$IMPORTER_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/importer/.env.production"
+        }
       }
     },
     "docker-push": {
@@ -38,9 +47,15 @@
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/importer/.env.default",
         "commands": [
           "docker push $IMPORTER_DOCKER_IMG:$IMPORTER_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/importer/.env.production"
+        }
       }
     },
     "serve": {

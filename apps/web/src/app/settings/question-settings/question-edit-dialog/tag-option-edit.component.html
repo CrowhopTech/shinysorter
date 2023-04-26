@@ -11,7 +11,7 @@
         </mat-error>
     </mat-form-field>
     <mat-form-field appearance="fill" class="flex-grow">
-        <input matInput #optionText required [value]="tagOption.description?"
+        <input matInput #optionText required [value]="tagOption.description ? tagOption.description : ''"
             (change)="optionDescriptionChange($event)">
     </mat-form-field>
     <button mat-icon-button (click)="resetOption()">

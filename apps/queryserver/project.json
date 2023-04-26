@@ -9,6 +9,9 @@
       "outputs": [
         "{options.outputPath}"
       ],
+      "inputs": [
+        "{projectRoot}/src/**"
+      ],
       "options": {
         "outputPath": "dist/apps/queryserver",
         "format": [
@@ -23,24 +26,36 @@
     },
     "docker-build": {
       "dependsOn": [
-        "^build"
+        "build"
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/queryserver/.env.default",
         "commands": [
           "docker build -f apps/queryserver/Dockerfile . -t $QUERYSERVER_DOCKER_IMG:$QUERYSERVER_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/queryserver/.env.production"
+        }
       }
     },
     "docker-push": {
       "dependsOn": [
-        "^docker-build"
+        "docker-build"
       ],
       "executor": "nx:run-commands",
       "options": {
+        "envFile": "apps/queryserver/.env.default",
         "commands": [
           "docker push $QUERYSERVER_DOCKER_IMG:$QUERYSERVER_DOCKER_TAG"
         ]
+      },
+      "configurations": {
+        "production": {
+          "envFile": "apps/queryserver/.env.production"
+        }
       }
     },
     "serve": {

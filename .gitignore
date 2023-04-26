@@ -40,3 +40,7 @@ Thumbs.db
 
 .angular
 .local.env
+
+# Env Configurations
+.env.default
+.env.production
