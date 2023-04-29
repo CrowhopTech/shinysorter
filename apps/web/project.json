@@ -11,7 +11,7 @@
         "{options.outputPath}"
       ],
       "inputs": [
-        "{projectRoot}/src/app",
+        "{projectRoot}/src/app/**",
         "{projectRoot}/src/assets/app.config.json",
         "{projectRoot}/src/styles.sass"
       ],
@@ -63,6 +63,9 @@
       "defaultConfiguration": "production"
     },
     "docker-build": {
+      "inputs": [
+        "default"
+      ],
       "dependsOn": [
         "build"
       ],

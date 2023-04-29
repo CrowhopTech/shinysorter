@@ -1,5 +1,5 @@
 <!-- Outer div necessary to keep everything nicely vertically aligned -->
-<div class="h-full flex flex-col">
+<div class="h-screen flex flex-col">
     <div id="image-viewer-root" class="w-full h-full fixed"
         *ngIf="queryManager.viewingFileID != -1 && queryManager.viewingFile">
         <button mat-icon-button disableRipple class="viewer-button absolute right-2 top-2"
@@ -28,7 +28,7 @@
     <app-toolbar class="flex-0" (onTagClick)="router.navigate(['/tag'])"
         (onSettingsClick)="router.navigate(['/settings'])" [currentMode]="'Searching'"></app-toolbar>
     <mat-sidenav-container class=" flex-grow" disableClose>
-        <mat-sidenav opened="true" mode="side" class="min-w-fit w-fit p-3">
+        <mat-sidenav opened="true" mode="side" class="sidebar min-w-fit w-fit p-3">
             <app-searchinput (queryChanged)="this.queryManager.navigateToQuery($event)" [query]="queryManager.query">
             </app-searchinput>
             <mat-divider></mat-divider>
