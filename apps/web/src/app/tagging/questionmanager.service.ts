@@ -51,6 +51,7 @@ export class QuestionManagerService {
   }
 
   private renavigate() {
+    console.log("renavigate()");
     this.router.navigate([],
       {
         queryParamsHandling: 'merge',
@@ -138,7 +139,7 @@ export class QuestionManagerService {
   }
 
   public async nextQuestion(): Promise<void> {
-    if (!this._questions || !this._currentFileID || !this._orderingID) {
+    if (!this._questions || !this._currentFileID || (this._orderingID == undefined)) {
       return;
     }
 
@@ -164,7 +165,7 @@ export class QuestionManagerService {
   }
 
   public previousQuestion() {
-    if (!this._questions || !this._orderingID) {
+    if (!this._questions || (this._orderingID == undefined)) {
       // Questions haven't loaded yet, don't do anything
       return;
     }
