@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
+import { environment } from '../environments/environment';
 
+export const AppConfigEnvVars = {
+    supabaseAddress: "SUPABASE_ADDRESS",
+    supabaseKey: "SUPABASE_KEY",
+    queryServerAddress: "QUERY_SERVER_ADDRESS",
+};
 export class AppConfig {
     supabaseAddress: string = "";
     supabaseKey: string = "";
@@ -17,7 +23,14 @@ export class AppService {
     // You can then inject it using a configmap!
     constructor(private http: HttpClient) { }
 
-    configUrl = `assets/app.config.json`;
+    private configUrl(): string {
+        console.log(environment);
+        if (!environment.production) {
+            return `assets/app.config.dev.json`;
+        }
+        return `assets/app.config.json`;
+    }
+
     private configSettings: AppConfig | null = null;
 
     public get settings() {
@@ -26,7 +39,7 @@ export class AppService {
 
     public load(): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.http.get(this.configUrl).pipe(map((response: Object) => response as AppConfig)).subscribe((response: AppConfig) => {
+            this.http.get(this.configUrl()).pipe(map((response: Object) => response as AppConfig)).subscribe((response: AppConfig) => {
                 this.configSettings = response;
                 resolve(true);
             });
