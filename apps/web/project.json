@@ -102,11 +102,9 @@
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
-        "production": {
-          "browserTarget": "web:build:production"
-        },
         "development": {
-          "browserTarget": "web:build:development"
+          "browserTarget": "web:build:development",
+          "open": true
         }
       },
       "defaultConfiguration": "development",
