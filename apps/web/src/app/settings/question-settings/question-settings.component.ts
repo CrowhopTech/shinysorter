@@ -76,7 +76,7 @@ export class QuestionSettingsComponent implements OnInit {
     }).afterClosed().subscribe(async (result?: { question: QuestionPatchWithOptions, options: QuestionOptionCreate[]; }) => {
       if (result) {
         var newOrderingID;
-        if (result.question.orderingID) {
+        if (result.question.orderingID != undefined && result.question.orderingID >= 0) {
           newOrderingID = result.question.orderingID;
         } else if (this.questions && this.questions.length > 0) {
           newOrderingID = this.questions[this.questions.length - 1].orderingID + 1;
