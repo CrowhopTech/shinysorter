@@ -87,13 +87,13 @@ export class QueryManagerService {
   }
 
   public navigateToQuery(query: FileQuery) {
-    this.router.navigate(["/search"], {
+    this.router.navigate([], {
       queryParams: query.searchPageParams(includeTagsParam, includeModeParam, excludeTagsParam, excludeModeParam)
     });
   }
 
   public viewClose() {
-    this.router.navigate(["/search"], {
+    this.router.navigate([], {
       queryParamsHandling: 'merge',
       queryParams: {
         [viewingFileParam]: null
@@ -105,7 +105,7 @@ export class QueryManagerService {
     if (!fileID) {
       return;
     }
-    this.router.navigate(["/search"], {
+    this.router.navigate([], {
       queryParamsHandling: 'merge',
       queryParams: {
         [viewingFileParam]: fileID.toString()
@@ -114,7 +114,7 @@ export class QueryManagerService {
   }
 
   public nextRandomFile() {
-    this.router.navigate(["/search"]);
+    this.router.navigate([]);
   }
 
   public getMoreResults() {

@@ -45,7 +45,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: SUPABASE_ADDRESS
-              value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+              value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.kong.port }}"
             - name: SUPABASE_KEY
               value: "{{ .Values.supabase.anonKey }}"
             - name: BUCKET_NAME

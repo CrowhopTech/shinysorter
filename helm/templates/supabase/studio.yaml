@@ -40,12 +40,12 @@ spec:
         - name: DEFAULT_PROJECT
           value: "Default Project"
         - name: SUPABASE_URL
-          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.studio.port}}"
+          value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.studio.port}}"
         - name: SUPABASE_PUBLIC_URL
-          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+          value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.kong.port }}"
           # # Kept for backwards compatibility with studio:0.22.08
         - name: SUPABASE_REST_URL
-          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+          value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.kong.port }}"
         - name: SUPABASE_ANON_KEY
           value: {{ .Values.supabase.anonKey }}
         - name: SUPABASE_SERVICE_KEY
@@ -59,7 +59,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: supabase-studio
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ include "shinysorter.fullname" . }}
 spec:
+  loadBalancerIP: {{ .Values.deploymentAddress }}
   ports:
     - name: ui
       targetPort: ui

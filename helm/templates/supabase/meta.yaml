@@ -35,7 +35,7 @@ spec:
         - name: PG_META_PORT
           value: "8080"
         - name: PG_META_DB_HOST
-          value: {{ .Values.supabase.postgresql.address }}
+          value: {{ .Values.deploymentAddress }}
         - name: PG_META_DB_PORT
           value: "{{ .Values.supabase.postgresql.port }}"
         - name: PG_META_DB_NAME

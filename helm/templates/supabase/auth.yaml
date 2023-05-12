@@ -42,13 +42,13 @@ spec:
         - name: GOTRUE_API_PORT
           value: "9999"
         - name: API_EXTERNAL_URL
-          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.kong.port }}"
+          value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.kong.port }}"
         - name: GOTRUE_DB_DRIVER
           value: postgres
         - name: GOTRUE_DB_DATABASE_URL
-          value: postgres://supabase_auth_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+          value: postgres://supabase_auth_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.deploymentAddress }}:{{ .Values.supabase.postgresql.port }}/postgres
         - name: GOTRUE_SITE_URL
-          value: "http://{{ .Values.supabase.address }}:{{ .Values.supabase.studio.port }}"
+          value: "http://{{ .Values.deploymentAddress }}:{{ .Values.supabase.studio.port }}"
         - name: GOTRUE_URI_ALLOW_LIST
           value: ""
         - name: GOTRUE_DISABLE_SIGNUP

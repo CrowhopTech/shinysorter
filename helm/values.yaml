@@ -1,11 +1,13 @@
 reclaimPolicy: Retain
 
+deploymentAddress: ""
+
 webdav:
   nameOverride: "shinysorter-importdir-webdav"
   urls:
     /importdir:
-      - user: user1
-        password: password1
+    - user: user1
+      password: password1
   service:
     type: ClusterIP
     port: 80
@@ -29,14 +31,15 @@ importer:
 frontend:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-frontend"
   tag: "alpha-v0.3.2"
-  prefix: ""
+  prefix: "ui"
   nodeSelector: null
   tolerations: null
 
 queryServer:
+  port: 3268
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-queryserver"
   tag: "alpha-v0.3.2"
-  prefix: ""
+  prefix: "query"
   nodeSelector: null
   tolerations: null
 
@@ -45,7 +48,6 @@ backup:
   tag: "alpha-v0.3.2"
 
 supabase:
-  address: ""
   jwtSecret: ""
   anonKey: ""
   serviceKey: ""

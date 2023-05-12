@@ -49,7 +49,7 @@ spec:
               name: supabase-db-credentials
               key: postgresPassword
         - name: DATABASE_URL
-          value: postgres://supabase_storage_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+          value: postgres://supabase_storage_admin:{{ .Values.supabase.postgresql.password }}@{{ .Values.deploymentAddress }}:{{ .Values.supabase.postgresql.port }}/postgres
         - name: FILE_SIZE_LIMIT
           value: "52428800"
         - name: STORAGE_BACKEND

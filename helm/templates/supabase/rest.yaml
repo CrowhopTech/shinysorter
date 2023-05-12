@@ -38,7 +38,7 @@ spec:
               name: supabase-db-credentials
               key: postgresPassword
         - name: PGRST_DB_URI
-          value: postgres://authenticator:{{ .Values.supabase.postgresql.password }}@{{ .Values.supabase.postgresql.address }}:{{ .Values.supabase.postgresql.port }}/postgres
+          value: postgres://authenticator:{{ .Values.supabase.postgresql.password }}@{{ .Values.deploymentAddress }}:{{ .Values.supabase.postgresql.port }}/postgres
         - name: PGRST_DB_SCHEMAS
           value: public,storage,graphql_public
         - name: PGRST_DB_ANON_ROLE

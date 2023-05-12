@@ -64,7 +64,8 @@
     },
     "docker-build": {
       "inputs": [
-        "default"
+        "default",
+        "{projectRoot}/nginx-conf"
       ],
       "dependsOn": [
         "build"

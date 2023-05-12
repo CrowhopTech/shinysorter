@@ -24,10 +24,6 @@ export class AppService {
     constructor(private http: HttpClient) { }
 
     private configUrl(): string {
-        console.log(environment);
-        if (!environment.production) {
-            return `assets/app.config.dev.json`;
-        }
         return `assets/app.config.json`;
     }
 

@@ -37,7 +37,7 @@ spec:
         - "./prod/rel/realtime/bin/realtime eval Realtime.Release.migrate && ./prod/rel/realtime/bin/realtime start"
         env:
         - name: DB_HOST
-          value: {{ .Values.supabase.postgresql.address }}
+          value: {{ .Values.deploymentAddress }}
         - name: DB_PORT
           value: "{{ .Values.supabase.postgresql.port }}"
         - name: DB_NAME

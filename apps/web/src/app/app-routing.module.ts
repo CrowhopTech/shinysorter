@@ -16,7 +16,7 @@ const routes: Routes = [
       { path: "", redirectTo: 'tags', pathMatch: 'full' },
     ]
   },
-  { path: "", redirectTo: "/search", pathMatch: "full" }
+  { path: "", redirectTo: "search", pathMatch: 'full' }
 ];
 
 @NgModule({
