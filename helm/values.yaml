@@ -5,22 +5,20 @@ deploymentAddress: ""
 webdav:
   nameOverride: "shinysorter-importdir-webdav"
   urls:
-    /importdir:
-    - user: user1
-      password: password1
+    /:
+    - user: username
+      password:
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 80
   persistence:
     enabled: true
     type: pvc
     existingClaim: shinysorter-importdir
-  ingress:
-    host: ""
 
 importer:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-importer"
-  tag: "alpha-v0.3.2"
+  tag: "alpha-v0.3.3"
   importSubdirectory: ""
   nodeSelector: null
   tolerations: null
@@ -30,7 +28,7 @@ importer:
 
 frontend:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-frontend"
-  tag: "alpha-v0.3.2"
+  tag: "alpha-v0.3.3"
   prefix: "ui"
   nodeSelector: null
   tolerations: null
@@ -38,21 +36,21 @@ frontend:
 queryServer:
   port: 3268
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-queryserver"
-  tag: "alpha-v0.3.2"
+  tag: "alpha-v0.3.3"
   prefix: "query"
   nodeSelector: null
   tolerations: null
 
 backup:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-backuptool"
-  tag: "alpha-v0.3.2"
+  tag: "alpha-v0.3.3"
 
 supabase:
   jwtSecret: ""
   anonKey: ""
   serviceKey: ""
   postgresql:
-    address: "" # Temporary hack
+    address: ""
     password: ""
     port: 31415
     nodeSelector: null
