@@ -13,6 +13,7 @@ import { QuestionDeleteDialogComponent, QuestionReorderDialogComponent } from '.
 export class QuestionTileComponent implements OnInit {
 
   @Input() question?: QuestionWithOptions;
+  @Input() unusedTags?: number[]; // Pass in as input so we don't have to fetch n times
 
   public get questionTagIDs(): number[] | undefined {
     if (this.question == undefined || this.question.questionoptions == null) {
@@ -50,7 +51,8 @@ export class QuestionTileComponent implements OnInit {
 
     this.dialog.open(QuestionEditDialogComponent, {
       data: {
-        question: this.question
+        question: this.question,
+        unusedTags: this.unusedTags
       }
     }).afterClosed().subscribe((result?: { question: QuestionPatchWithOptions, options?: QuestionOptionCreate[]; }) => {
       if (result && this.question) {

@@ -1,7 +1,12 @@
 <div class="flex flex-row" *ngIf="tagOption">
     <mat-form-field appearance="fill" class="flex-grow-0 w-min h-full">
         <mat-select [value]="tagOption ? tagOption.tagid : -1" (selectionChange)="tagChange($event)">
-            <mat-option *ngFor="let tag of tags" [value]="tag.id">{{ tag.name }}</mat-option>
+            <mat-optgroup label="Unused Tags">
+                <mat-option *ngFor="let tag of unusedTags" [value]="tag.id">{{ tag.name }}</mat-option>
+            </mat-optgroup>
+            <mat-optgroup label="Used Tags">
+                <mat-option *ngFor="let tag of usedTags" [value]="tag.id">{{ tag.name }}</mat-option>
+            </mat-optgroup>
         </mat-select>
     </mat-form-field>
     <mat-form-field appearance="fill" class="flex-grow">
