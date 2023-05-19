@@ -243,14 +243,32 @@ export class SupabaseService {
                 }
             }
             if (options != undefined) {
+                // Find all options currently on file (to reload them if needed)
+                const { error: listError, data: originalOptions } = await this.supabase.from("questionoptions").select("*").eq("questionid", id);
+                if (listError) {
+                    resolve(listError);
+                }
+
                 // Drop all options currently on file
                 const { error: deleteError } = await this.supabase.from("questionoptions").delete().eq("questionid", id);
                 if (deleteError) {
                     resolve(deleteError);
                 }
 
+                // Try to insert the new options
                 const { error: insertError } = await this.supabase.from("questionoptions").insert(options);
                 if (insertError) {
+                    // Revert by deleting all options again and adding the old ones back
+                    const { error: newDeleteError } = await this.supabase.from("questionoptions").delete().eq("questionid", id);
+                    if (newDeleteError) {
+                        resolve(newDeleteError);
+                    }
+
+                    const { error: newInsertError } = await this.supabase.from("questionoptions").insert(originalOptions);
+                    if (newInsertError) {
+                        resolve(newInsertError);
+                    }
+
                     resolve(insertError);
                 }
             }
