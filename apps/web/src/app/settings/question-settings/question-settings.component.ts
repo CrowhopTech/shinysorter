@@ -90,6 +90,7 @@ export class QuestionSettingsComponent implements OnInit {
         }, result.options);
         if (error) {
           this.snackbar.open(`Failed to create question: ${error.message}`, undefined, { duration: 7500 });
+          this.refreshQuestions();
           return;
         }
         this.refreshQuestions();
@@ -105,6 +106,7 @@ export class QuestionSettingsComponent implements OnInit {
     const error = await this.supaService.patchQuestion(id, patch, options);
     if (error) {
       this.snackbar.open(`Failed to update question: ${error.message}`, undefined, { duration: 7500 });
+      this.refreshQuestions();
       return;
     }
     this.refreshQuestions();
@@ -117,6 +119,7 @@ export class QuestionSettingsComponent implements OnInit {
     const error = await this.supaService.deleteQuestion(id);
     if (error) {
       this.snackbar.open(`Failed to delete question: ${error.message}`, undefined, { duration: 7500 });
+      this.refreshQuestions();
       return;
     }
     this.refreshQuestions();
@@ -129,6 +132,7 @@ export class QuestionSettingsComponent implements OnInit {
     const error = await this.supaService.reorderQuestions(newOrder);
     if (error) {
       this.snackbar.open(`Failed to reorder questions: ${error.message}`, undefined, { duration: 7500 });
+      this.refreshQuestions();
       return;
     }
     this.refreshQuestions();
