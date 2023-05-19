@@ -37,7 +37,8 @@
         </div>
 
         <div *ngFor="let tagOption of questionOptionsCopy" class="my-1">
-            <app-tag-option-edit [tagOption]="tagOption" [tags]="tags" (removeTag)="removeTag($event)">
+            <app-tag-option-edit [tagOption]="tagOption" [tags]="tags" [unusedTagIDs]="unusedTagIDs"
+                (removeTag)="removeTag($event)">
             </app-tag-option-edit>
         </div>
     </form>

@@ -70,8 +70,8 @@ export class QuestionSettingsComponent implements OnInit {
           mutuallyExclusive: false,
           questionoptions: [],
           description: null,
-        } as QuestionWithOptions
-
+        } as QuestionWithOptions,
+        usedTags: this.unusedTagIDs
       }
     }).afterClosed().subscribe(async (result?: { question: QuestionPatchWithOptions, options: QuestionOptionCreate[]; }) => {
       if (result) {

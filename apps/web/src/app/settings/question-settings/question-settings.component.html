@@ -23,7 +23,7 @@
     </button>
 </div>
 <mat-accordion>
-    <app-question-tile *ngFor="let q of questions" [question]="q"
+    <app-question-tile *ngFor="let q of questions" [question]="q" [unusedTags]="this.unusedTagIDs"
         (updateQuestion)="updateQuestion(q.id, $event.question, $event.options)"
         (deleteQuestion)="deleteQuestion($event)" (reorderQuestions)="reorderQuestions($event)">
     </app-question-tile>

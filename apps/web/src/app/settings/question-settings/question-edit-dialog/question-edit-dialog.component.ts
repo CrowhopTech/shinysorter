@@ -15,10 +15,11 @@ export class QuestionEditDialogComponent implements OnInit {
   public questionOptionsCopy: QuestionOptionCreate[];
   public mutexString = "";
   public tags?: Tag[];
+  public unusedTags?: number[];
 
   boolToStr = (b: boolean) => b ? 'true' : 'false';
 
-  constructor(public dialogRef: MatDialogRef<QuestionEditDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { question: QuestionWithOptions; }, public apiUtility: APIUtilityService, private supaService: SupabaseService) {
+  constructor(public dialogRef: MatDialogRef<QuestionEditDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { question: QuestionWithOptions, unusedTags: number[]; }, public apiUtility: APIUtilityService, private supaService: SupabaseService) {
     this.questionCopy = {
       id: data.question.id,
       orderingID: data.question.orderingID,
@@ -28,6 +29,15 @@ export class QuestionEditDialogComponent implements OnInit {
     };
     this.questionOptionsCopy = data.question.questionoptions;
     this.mutexString = data.question.mutuallyExclusive ? "Allow only one selection" : "Allow selecting multiple";
+    this.unusedTags = data.unusedTags;
+  }
+
+  public get unusedTagIDs(): number[] | undefined {
+    if (this.unusedTags == undefined) {
+      return undefined;
+    }
+    // Remove any tags that are already in use in the UI but not yet persisted to the DB
+    return this.unusedTags.filter(t => !this.questionOptionsCopy.map(to => to.tagid).includes(t));
   }
 
   async ngOnInit(): Promise<void> {
@@ -37,7 +47,7 @@ export class QuestionEditDialogComponent implements OnInit {
       throw error;
     }
     this.tags = data as Tag[];
-  }
+  };
 
   mutexChange($event: MatSlideToggleChange) {
     this.questionCopy.mutuallyExclusive = $event.checked;
@@ -103,7 +113,16 @@ export class TagOptionEditComponent implements OnInit {
     return this._tagOption;
   }
 
+  @Input() unusedTagIDs?: number[];
   @Input() tags?: Tag[]; // Pass this in as an input so we don't have to fetch it n times
+
+  public get unusedTags(): Tag[] | undefined {
+    return this.tags?.filter(t => this.unusedTagIDs?.includes(t.id));
+  }
+
+  public get usedTags(): Tag[] | undefined {
+    return this.tags?.filter(t => !this.unusedTagIDs?.includes(t.id));
+  }
 
   private _originalText?: string | null = null;
   private _originalTag?: number | null = -1;
@@ -116,7 +135,7 @@ export class TagOptionEditComponent implements OnInit {
 
   ngOnInit(): void {
 
-  }
+  };
 
   optionTextChange($event: any) {
     if (!this.tagOption) {
