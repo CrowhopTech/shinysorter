@@ -243,6 +243,9 @@ export class SupabaseService {
                 }
             }
             if (options != undefined) {
+                // Supabase doesn't like this field, postgrest adds it as a query parameter and then PG complains because it's a null entry
+                options.forEach(to => delete to.id);
+
                 // Find all options currently on file (to reload them if needed)
                 const { error: listError, data: originalOptions } = await this.supabase.from("questionoptions").select("*").eq("questionid", id);
                 if (listError) {
