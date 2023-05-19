@@ -89,7 +89,7 @@ export class QuestionSettingsComponent implements OnInit {
           mutuallyExclusive: result.question.mutuallyExclusive,
         }, result.options);
         if (error) {
-          this.snackbar.open(`Failed to create question: ${error}`, undefined, { duration: 7500 });
+          this.snackbar.open(`Failed to create question: ${error.message}`, undefined, { duration: 7500 });
           return;
         }
         this.refreshQuestions();
@@ -104,7 +104,7 @@ export class QuestionSettingsComponent implements OnInit {
     const patch = $event as QuestionPatch;
     const error = await this.supaService.patchQuestion(id, patch, options);
     if (error) {
-      this.snackbar.open(`Failed to update question: ${error}`, undefined, { duration: 7500 });
+      this.snackbar.open(`Failed to update question: ${error.message}`, undefined, { duration: 7500 });
       return;
     }
     this.refreshQuestions();
@@ -116,7 +116,7 @@ export class QuestionSettingsComponent implements OnInit {
   async deleteQuestion(id: number) {
     const error = await this.supaService.deleteQuestion(id);
     if (error) {
-      this.snackbar.open(`Failed to delete question: ${error}`, undefined, { duration: 7500 });
+      this.snackbar.open(`Failed to delete question: ${error.message}`, undefined, { duration: 7500 });
       return;
     }
     this.refreshQuestions();
@@ -128,7 +128,7 @@ export class QuestionSettingsComponent implements OnInit {
   async reorderQuestions(newOrder: number[]) {
     const error = await this.supaService.reorderQuestions(newOrder);
     if (error) {
-      this.snackbar.open(`Failed to reorder questions: ${error}`, undefined, { duration: 7500 });
+      this.snackbar.open(`Failed to reorder questions: ${error.message}`, undefined, { duration: 7500 });
       return;
     }
     this.refreshQuestions();

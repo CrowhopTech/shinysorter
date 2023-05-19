@@ -68,7 +68,7 @@ export class TagTileComponent implements OnInit {
       description: this.newDescription
     });
     if (error) {
-      this.snackbar.open(`Failed to update tag ${this.tag.name}: ${error}`, undefined, { duration: 7500 });
+      this.snackbar.open(`Failed to update tag ${this.tag.name}: ${error.message}`, undefined, { duration: 7500 });
       this.savePending = false;
       throw error;
     }
@@ -90,7 +90,7 @@ export class TagTileComponent implements OnInit {
       if (result && this.tag) {
         const { error } = await this.supaService.deleteTag(this.tag.id);
         if (error) {
-          this.snackbar.open(`Failed to delete tag ${this.tag.name}: ${error}`, undefined, { duration: 7500 });
+          this.snackbar.open(`Failed to delete tag ${this.tag.name}: ${error.message}`, undefined, { duration: 7500 });
           this.savePending = false;
         }
         this.refetchRequired.emit();

@@ -33,7 +33,7 @@ export class TagCreateTileComponent implements OnInit {
       description: this.newDescription,
     });
     if (error) {
-      this.snackbar.open(`Failed to create tag ${this.newName}: ${error}`, undefined, { duration: 7500 });
+      this.snackbar.open(`Failed to create tag ${this.newName}: ${error.message}`, undefined, { duration: 7500 });
       this.savePending = false;
       return;
     }
