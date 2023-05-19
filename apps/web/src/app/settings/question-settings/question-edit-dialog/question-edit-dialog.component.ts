@@ -148,5 +148,6 @@ export class TagOptionEditComponent implements OnInit {
     }
 
     this.tagOption.tagid = $event.value;
+    this.tagOption.optiontext = this.tags?.find(t => t.id == $event.value)?.name;
   }
 }
