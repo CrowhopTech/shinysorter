@@ -6,6 +6,7 @@ import { Database } from './schema';
 import { execSync } from 'child_process';
 import { FileMetadata, getFileMetadata } from './filemeta';
 import * as errorout from './errorout';
+import { PopulateFileMetaWithFuzzyHashes } from './imagehasher';
 
 type FileEntry = Database['public']['Tables']['files']['Row'];
 type FilePatch = Database['public']['Tables']['files']['Update'];
@@ -17,6 +18,7 @@ const scanInterval = 1000;
 
 const runningFiles: Set<string> = new Set<string>();
 const aborts: Set<string> = new Set<string>();
+let isStopping = false;
 
 var supabaseClient: SupabaseClient | undefined;
 var storageBucketName = "";
@@ -25,6 +27,10 @@ var thumbsBucketName = "";
 const thumbnailWidth = 640;
 
 function checkFileAborted(path: string, reject: (reason?: any) => void): boolean {
+    if (isStopping) {
+        reject(`File ${path} aborted as program is stopping`);
+        return true;
+    }
     if (aborts.has(path)) {
         reject(`File ${path} aborted`);
         return true;
@@ -65,11 +71,12 @@ async function checkFileEntryForExisting(path: string, storageID: string, fileMe
             throw new Error(`md5sum '${fileMetadata.md5sum}' of new file does not match existing md5sum '${existingFileResult["md5sum"]}'in Files table`);
         }
         // Set md5sum and mime type just to be sure
-        const filePatch: FilePatch = {
+        let filePatch: FilePatch = {
             id: existingFileResult["id"],
             md5sum: fileMetadata.md5sum,
             mimeType: fileMetadata.mimeType,
         };
+        filePatch = PopulateFileMetaWithFuzzyHashes(filePatch, fileMetadata.ahash, fileMetadata.phash, fileMetadata.dhash);
         // If file entry exists: just make sure md5sum is up to date and any other base metadata we care about
         const { error: patchError } = await supabaseClient.from("files").update(filePatch);
         if (patchError) {
@@ -77,16 +84,17 @@ async function checkFileEntryForExisting(path: string, storageID: string, fileMe
         }
     } else {
         // If file entry DNE: insert row
-        const newFileEntry: FileCreate = {
+        let newFileEntry: FileCreate = {
             storageID: storageID,
             md5sum: fileMetadata.md5sum,
             mimeType: fileMetadata.mimeType,
             hasBeenTagged: false,
             filename: path
         };
+        newFileEntry = PopulateFileMetaWithFuzzyHashes(newFileEntry, fileMetadata.ahash, fileMetadata.phash, fileMetadata.dhash);
         const { error: createError } = await supabaseClient.from("files").insert(newFileEntry);
         if (createError) {
-            throw new Error(`Failed to create new file entry: ${createError}`);
+            throw new Error(`Failed to create new file entry: ${createError.message}`);
         }
     }
 }
@@ -103,7 +111,7 @@ async function tryGenerateThumbnail(storageID: string, basePath: string, fullPat
             throw new Error("storageID is somehow undefined (should never happen)");
         }
 
-        execSync(generateFfmpegCommand(fullPath, thumbPath, fileMetadata.mimeType != undefined && fileMetadata.mimeType.startsWith("video"), thumbnailWidth));
+        execSync(generateFfmpegThumbnailCommand(fullPath, thumbPath, fileMetadata.mimeType != undefined && fileMetadata.mimeType.startsWith("video"), thumbnailWidth));
 
         const thumbContents = fs.readFileSync(thumbPath);
 
@@ -127,24 +135,28 @@ function doImport(basePath: string) {
                 reject("Supabase client is not initialized");
                 return;
             }
+            if (checkFileAborted(basePath, reject)) resolve();
 
             console.debug("Starting file import promise...");
 
             // Do the import, check aborts map at each step
             const filepath = path.join(importDir, basePath);
-            const fileContents = fs.readFileSync(filepath);
 
             console.debug("Successfully read file contents...");
 
             // Uncomment below if we change how we read files (if we add an await)
-            // if (checkFileAborted(basePath, reject)) return;
+            if (checkFileAborted(basePath, reject)) resolve();
 
-            const { md5sum, mimeType } = await getFileMetadata(filepath);
+            const fileMeta = await getFileMetadata(filepath);
             var storageID: string | undefined = undefined;
 
             console.debug("Successfully got file metadata...");
 
-            if (checkFileAborted(basePath, reject)) return;
+            if (checkFileAborted(basePath, reject)) resolve();
+
+            const fileContents = fs.readFileSync(filepath);
+
+            if (checkFileAborted(basePath, reject)) resolve();
 
             // Try to upload
             const { data: uploadResult, error: uploadError } = await supabaseClient.storage.from(storageBucketName).upload(basePath, fileContents);
@@ -156,7 +168,7 @@ function doImport(basePath: string) {
                     return;
                 }
 
-                if (checkFileAborted(basePath, reject)) return;
+                if (checkFileAborted(basePath, reject)) resolve();
 
                 // Error is "already exists":
                 // Get existing storage row entry
@@ -173,7 +185,7 @@ function doImport(basePath: string) {
 
                 if (checkFileAborted(basePath, reject)) return;
 
-                await checkFileEntryForExisting(basePath, storageID, { md5sum, mimeType });
+                await checkFileEntryForExisting(basePath, storageID, fileMeta);
             } else {
                 console.debug("Successfully uploaded file to supabase storage, getting created storage entry...");
                 // Get newly created storage row entry
@@ -190,21 +202,22 @@ function doImport(basePath: string) {
                 storageID = newStorageResult.id;
                 // If no error:
                 //   Create file entry
-                const newFileEntry: FileCreate = {
+                let newFileEntry: FileCreate = {
                     storageID: newStorageResult.id,
-                    md5sum: md5sum,
-                    mimeType: mimeType,
+                    md5sum: fileMeta.md5sum,
+                    mimeType: fileMeta.mimeType,
                     hasBeenTagged: false,
                     filename: basePath
                 };
+                newFileEntry = PopulateFileMetaWithFuzzyHashes(newFileEntry, fileMeta.ahash, fileMeta.phash, fileMeta.dhash);
                 const { error: createError } = await supabaseClient.from("files").insert(newFileEntry);
                 if (createError) {
-                    reject(`Failed to create new file entry: ${createError}`);
+                    reject(`Failed to create new file entry: ${createError.message}`);
                     return;
                 }
             }
 
-            await tryGenerateThumbnail(storageID, basePath, filepath, { md5sum, mimeType });
+            await tryGenerateThumbnail(storageID, basePath, filepath, fileMeta);
 
             // Remove local file
             fs.rmSync(filepath);
@@ -217,7 +230,7 @@ function doImport(basePath: string) {
     });
 }
 
-function generateFfmpegCommand(inputPath: string, outputPath: string, isVideo: boolean, targetWidth: number): string {
+function generateFfmpegThumbnailCommand(inputPath: string, outputPath: string, isVideo: boolean, targetWidth: number): string {
     // -i: Input file (can be either an image or a video. If video, specify the starting frame)
     // -ss: Seek to the specified time (in seconds) in the input file
     // -vframes: Number of frames to extract
@@ -232,12 +245,14 @@ function generateFfmpegCommand(inputPath: string, outputPath: string, isVideo: b
 
 function checkSizeMatch(filepath: string, lastSize: number, resolve: (value: void | PromiseLike<void>) => void, reject: (reason?: any) => void) {
     try {
+        if (checkFileAborted(filepath, reject)) resolve();
         const stats = fs.statSync(filepath);
         console.log(`Old size for file ${filepath} is ${lastSize}, is now ${stats.size}`);
         if (stats.size == lastSize) {
             resolve();
             return;
         }
+        if (checkFileAborted(filepath, reject)) resolve();
         setTimeout(() => {
             checkSizeMatch(filepath, stats.size, resolve, reject);
         }, scanInterval);
@@ -281,6 +296,7 @@ function fileAdded(basePath: string) {
                 aborts.delete(basePath);
                 runningFiles.delete(basePath);
                 errorout.setErrorForFileAndWrite(importDir, basePath, reason);
+                if (checkFileAborted(basePath, () => { })) return;
                 setTimeout(() => {
                     fileAdded(basePath); // Enqueue another run of this file to retry
                 }, 1000);
@@ -387,11 +403,15 @@ function main() {
     process.on('SIGTERM', code => {
         // Only synchronous calls
         watcher.close();
+        isStopping = true;
+        runningFiles.forEach(v => aborts.add(v));
         console.log(`Process received SIGTERM`);
     });
     process.on('SIGINT', code => {
         // Only synchronous calls
         watcher.close();
+        isStopping = true;
+        runningFiles.forEach(v => aborts.add(v));
         console.log(`Process received SIGINT`);
     });
 }
