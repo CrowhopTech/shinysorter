@@ -11,10 +11,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { QuestionSettingsComponent } from './question-settings.component';
+import { AppConfig, TOKEN } from '../../app.service';
 
 describe('QuestionSettingsComponent', () => {
   let component: QuestionSettingsComponent;
   let fixture: ComponentFixture<QuestionSettingsComponent>;
+  let appConfig = new AppConfig();
+  appConfig.supabaseAddress = "http://localhost:8080";
+  appConfig.supabaseKey = "asdfasdf";
+  appConfig.queryServerAddress = "http://localhost:8081";
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -30,6 +35,9 @@ describe('QuestionSettingsComponent', () => {
         MatSnackBarModule,
         MatSelectModule,
         MatExpansionModule
+      ],
+      providers: [
+        { provide: TOKEN, useValue: appConfig }
       ]
     })
       .compileComponents();

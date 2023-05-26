@@ -19,19 +19,20 @@ export class SearchinputComponent implements OnInit {
 
   constructor(private supaService: SupabaseService) { }
 
-  async ngOnInit(): Promise<void> {
-    let tags = await this.supaService.listTags();
-    if (tags.data != null) {
-      this.allTags = tags.data as Tag[];
-    }
-    if (tags.error != null) {
-      this.allTags = undefined;
-      if (tags.error instanceof HttpErrorResponse) {
-        this.tagsErr = tags.error.message;
-      } else {
-        this.tagsErr = tags.error.toString();
+  ngOnInit(): void {
+    this.supaService.listTags().then(tags => {
+      if (tags.data != null) {
+        this.allTags = tags.data as Tag[];
       }
-    }
+      if (tags.error != null) {
+        this.allTags = undefined;
+        if (tags.error instanceof HttpErrorResponse) {
+          this.tagsErr = tags.error.message;
+        } else {
+          this.tagsErr = tags.error.toString();
+        }
+      }
+    });
   }
 
   emitQueryChange(includeTags: number[], excludeTags: number[], includeMode: SearchMode, excludeMode: SearchMode) {

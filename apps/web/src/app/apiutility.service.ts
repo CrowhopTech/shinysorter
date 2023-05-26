@@ -11,9 +11,7 @@ export class APIUtilityService {
   tagsMap?: Map<number, string>;
   tagsFetchError?: string;
 
-  constructor(private appConfig: AppService, private supaService: SupabaseService) {
-    this.updateTagCache();
-  }
+  constructor(private supaService: SupabaseService) { } // TODO: we need to call updateTagCache() ASAP (but not in the constructor cuz it breaks unit tests)
 
   // ===== Tag Cache
   public async updateTagCache() {

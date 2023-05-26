@@ -8,10 +8,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { TagCreateTileComponent } from './tag-create-tile.component';
+import { AppConfig, TOKEN } from '../../../app.service';
 
 describe('TagCreateTileComponent', () => {
   let component: TagCreateTileComponent;
   let fixture: ComponentFixture<TagCreateTileComponent>;
+  let appConfig = new AppConfig();
+  appConfig.supabaseAddress = "http://localhost:8080";
+  appConfig.supabaseKey = "asdfasdf";
+  appConfig.queryServerAddress = "http://localhost:8081";
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -24,6 +29,9 @@ describe('TagCreateTileComponent', () => {
         MatButtonModule,
         MatIconModule,
         MatCardModule
+      ],
+      providers: [
+        { provide: TOKEN, useValue: appConfig }
       ]
     })
       .compileComponents();
