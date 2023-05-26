@@ -9,10 +9,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { TagSettingsComponent } from './tag-settings.component';
+import { AppConfig, TOKEN } from '../../app.service';
 
 describe('TagSettingsComponent', () => {
   let component: TagSettingsComponent;
   let fixture: ComponentFixture<TagSettingsComponent>;
+  let appConfig = new AppConfig();
+  appConfig.supabaseAddress = "http://localhost:8080";
+  appConfig.supabaseKey = "asdfasdf";
+  appConfig.queryServerAddress = "http://localhost:8081";
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -27,6 +32,9 @@ describe('TagSettingsComponent', () => {
         MatButtonModule,
         MatIconModule,
         MatFormFieldModule,
+      ],
+      providers: [
+        { provide: TOKEN, useValue: appConfig }
       ]
     })
       .compileComponents();

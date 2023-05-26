@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import {
     AuthChangeEvent,
     AuthSession,
@@ -9,7 +9,7 @@ import {
 } from '@supabase/supabase-js';
 import { FileObject } from '@supabase/storage-js';
 import axios, { AxiosResponse } from 'axios';
-import { AppService } from './app.service';
+import { AppService, TOKEN } from './app.service';
 import { SearchMode } from './filequery';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FileSaverService } from 'ngx-filesaver';

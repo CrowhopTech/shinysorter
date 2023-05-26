@@ -5,10 +5,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { SearchinputComponent } from './searchinput.component';
+import { AppConfig, TOKEN } from '../../app.service';
 
 describe('SearchinputComponent', () => {
   let component: SearchinputComponent;
   let fixture: ComponentFixture<SearchinputComponent>;
+  let appConfig = new AppConfig();
+  appConfig.supabaseAddress = "http://localhost:8080";
+  appConfig.supabaseKey = "asdfasdf";
+  appConfig.queryServerAddress = "http://localhost:8081";
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,6 +23,9 @@ describe('SearchinputComponent', () => {
         MatButtonModule,
         MatIconModule,
         MatSlideToggleModule
+      ],
+      providers: [
+        { provide: TOKEN, useValue: appConfig }
       ]
     })
       .compileComponents();
