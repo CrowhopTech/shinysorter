@@ -6,45 +6,48 @@ import { Subscription } from 'rxjs';
 import { SearchMode, FileQuery } from '../filequery';
 import { SupabaseService, TaggedFileEntry } from '../supabase.service';
 
-const includeTagsParam = "includeTags";
-const excludeTagsParam = "excludeTags";
-const includeModeParam = "includeMode";
-const excludeModeParam = "excludeMode";
-const viewingFileParam = "view";
+export const includeTagsParam = "includeTags";
+export const excludeTagsParam = "excludeTags";
+export const includeModeParam = "includeMode";
+export const excludeModeParam = "excludeMode";
+export const viewingFileParam = "view";
 
-const pageSize = 3;
+export const pageSize = 3;
+
+export function getNumberArrayParam(params: Params, param: string): number[] {
+  const val: string = params[param];
+  if (!val) {
+    return [];
+  }
+
+  const split = val.split(",");
+  const parsed = split.map(s => s.trim()).filter(s => s.length > 0).map(s => parseInt(s));
+  if (parsed.some(n => Number.isNaN(n))) {
+    throw new SyntaxError("Invalid number in parameter");
+  }
+  return parsed;
+}
+
+export function getSearchModeParam(params: Params, param: string, def: SearchMode): SearchMode {
+  const val: string = params[param]?.trim();
+  if (!val || val.length == 0) {
+    return def;
+  }
+
+  switch (val.trim()) {
+    case "any":
+      return "any";
+    case "all":
+      return "all";
+    default:
+      throw new SyntaxError(`${param} should be 'all' or 'any', got '${val}'`);
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class QueryManagerService {
-  private getNumberArrayParam(params: Params, param: string): number[] {
-    const val: string = params[param];
-    if (!val) {
-      return [];
-    }
-
-    const split = val.split(",");
-    const parsed = split.map(s => parseInt(s));
-    return parsed;
-  }
-
-  private getSearchModeParam(params: Params, param: string, def: SearchMode): SearchMode {
-    const val: string = params[param];
-    if (!val) {
-      return def;
-    }
-
-    switch (val) {
-      case "any":
-        return "any";
-      case "all":
-        return "all";
-      default:
-        throw new SyntaxError("includeMode should be 'all' or 'any'");
-    }
-  }
-
   @Output() paramsChanged = new EventEmitter<undefined>();
   @Output() searchResultReady = new EventEmitter<undefined>();
 
@@ -185,7 +188,7 @@ export class QueryManagerService {
     return this._searchSubscription && !this._searchSubscription.closed;
   }
 
-  async listFileCall(cont?: number, append: boolean = false): Promise<void> {
+  public async listFileCall(cont?: number, append: boolean = false): Promise<void> {
     if (!append) {
       this._searchResult = undefined;
       this._noMoreResults = false;
@@ -240,10 +243,10 @@ export class QueryManagerService {
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(async (params) => {
       const newQuery = new FileQuery([], [], "all", "all", true);
-      newQuery.includeTags = this.getNumberArrayParam(params, includeTagsParam);
-      newQuery.excludeTags = this.getNumberArrayParam(params, excludeTagsParam);
-      newQuery.includeMode = this.getSearchModeParam(params, includeModeParam, "all");
-      newQuery.excludeMode = this.getSearchModeParam(params, excludeModeParam, "all");
+      newQuery.includeTags = getNumberArrayParam(params, includeTagsParam);
+      newQuery.excludeTags = getNumberArrayParam(params, excludeTagsParam);
+      newQuery.includeMode = getSearchModeParam(params, includeModeParam, "all");
+      newQuery.excludeMode = getSearchModeParam(params, excludeModeParam, "all");
       newQuery.hasBeenTagged = true;
 
       let viewingFile: number = params[viewingFileParam];
