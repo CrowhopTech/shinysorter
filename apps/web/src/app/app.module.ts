@@ -48,6 +48,7 @@ import { QuestionTileComponent } from './settings/question-settings/question-til
 import { QuestionEditDialogComponent, TagOptionEditComponent } from './settings/question-settings/question-edit-dialog/question-edit-dialog.component';
 import { TagChipComponent } from './tag-chip/tag-chip.component';
 import { AppService } from './app.service';
+import { TOKEN } from './app.service';
 
 // Use this to load config values **at runtime**! See the comment values around this file for a full example (mainly see providers in the module)
 
@@ -134,6 +135,10 @@ export function initApp(appService: AppService) {
       provide: APP_BASE_HREF,
       useValue: "/" + (window.location.pathname.split("/")[1] || ""),
     },
+    {
+      provide: TOKEN,
+      useValue: undefined, // Read from URL instead
+    }
   ],
   bootstrap: [AppComponent]
 })
