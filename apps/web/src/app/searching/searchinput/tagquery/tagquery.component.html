@@ -1,7 +1,10 @@
-<button *ngIf="addVisible" mat-icon-button class="minibutton" id="add-button" (click)="addClicked.emit(tag)">
-    <mat-icon class="text-green-800">add_circle</mat-icon>
-</button>
-<button *ngIf="removeVisible" mat-icon-button class="minibutton" id="remove-button" (click)="removeClicked.emit(tag)">
-    <mat-icon class="text-red-800">remove_circle</mat-icon>
-</button>
-{{tag}}
+<div class="flex flex-row items-center">
+    <button *ngIf="addVisible" mat-icon-button class="minibutton" id="add-button" (click)="addClicked.emit(tag)">
+        <mat-icon class="text-green-800">add_circle</mat-icon>
+    </button>
+    <button *ngIf="removeVisible" mat-icon-button class="minibutton" id="remove-button"
+        (click)="removeClicked.emit(tag)">
+        <mat-icon class="text-red-800">remove_circle</mat-icon>
+    </button>
+    {{tag}}
+</div>
