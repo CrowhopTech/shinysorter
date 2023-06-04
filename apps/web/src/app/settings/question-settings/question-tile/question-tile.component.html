@@ -1,9 +1,9 @@
 <mat-expansion-panel>
-    <mat-expansion-panel-header *ngIf="question">
+    <mat-expansion-panel-header *ngIf="question" class="tile-header">
         <mat-panel-title>
             <b class="mr-3">{{ question.questionText }}</b>{{ question.description}}
         </mat-panel-title>
-        <mat-panel-description>
+        <mat-panel-description class="my-2">
             {{ question.questionoptions.length }} options,
             {{ question.mutuallyExclusive ? 'select one' : 'select multiple' }}
             <app-tag-chip [tagIDs]="questionTagIDs" class="ml-3"></app-tag-chip>
