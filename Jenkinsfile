@@ -1,6 +1,10 @@
 pipeline {
     // TODO: wrap entire Jenkinsfile in a kubernetes builder?
-    agent any
+    agent {
+        docker {
+            image 'registry.home.crowhop.tech:8080/shinysorter/shinysorter-builder:latest'
+        }
+    }
 
     stages {
         stage('Clone') {
