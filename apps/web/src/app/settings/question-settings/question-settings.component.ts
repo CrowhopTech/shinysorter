@@ -70,6 +70,7 @@ export class QuestionSettingsComponent implements OnInit {
           mutuallyExclusive: false,
           questionoptions: [],
           description: null,
+          requiredOptions: [],
         } as QuestionWithOptions,
         usedTags: this.unusedTagIDs
       }
