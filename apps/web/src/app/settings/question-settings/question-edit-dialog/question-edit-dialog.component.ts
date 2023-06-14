@@ -45,10 +45,6 @@ export class QuestionEditDialogComponent implements OnInit {
     return this.tags?.find(t => t.id == id);
   }
 
-  public printChange($event: any) {
-    console.log($event);
-  }
-
   async ngOnInit(): Promise<void> {
     this.apiUtility.updateTagCache();
     const { data, error } = await this.supaService.listTags();
