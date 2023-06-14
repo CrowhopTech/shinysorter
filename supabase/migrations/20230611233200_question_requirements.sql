@@ -1,0 +1,1 @@
+ALTER TABLE public.questions ADD COLUMN "requiredOptions" INT8[] DEFAULT array[]::INT8[] NOT NULL;

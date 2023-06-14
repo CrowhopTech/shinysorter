@@ -51,7 +51,6 @@ export class QuestionManagerService {
   }
 
   private renavigate() {
-    console.log("renavigate()");
     this.router.navigate([],
       {
         queryParamsHandling: 'merge',
@@ -75,6 +74,86 @@ export class QuestionManagerService {
     this._fetchErr = undefined;
   }
 
+  private async getNewLocalParams(fileID: number): Promise<{ currentFile: TaggedFileEntry, selectedTags: number[], questions: QuestionWithOptions[]; }> {
+    // Get file and questions from the database
+    const { data: filedata, error: fileerr } = await this.supaService.getFileByID(fileID);
+    if (fileerr) {
+      throw fileerr;
+    }
+    const currentFile = filedata as TaggedFileEntry;
+    // Default selected tags to the tags on the file: the query params will overwrite this later if we have something else
+    const selectedTags = currentFile.filetags.map(t => t.tagid);
+
+    const { data: questiondata, error: questionerr } = await this.supaService.listQuestions();
+    if (questionerr) {
+      throw questionerr;
+    }
+    const questions = questiondata as QuestionWithOptions[];
+
+    return { currentFile, selectedTags, questions };
+  }
+
+  // getNextQuestion will find the next question, and return it along with the completion percentage.
+  // It will account for gaps in ordering ID, as well as questions that don't match the "required options"
+  private getNextQuestion(questions: QuestionWithOptions[], orderingID: number, selectedTags?: number[]): { nextQuestion: QuestionWithOptions | null, completionPercentage: number; } {
+    if (orderingID == undefined) {
+      throw new Error("orderingID is undefined");
+    }
+
+    var currentOID = orderingID;
+    while (true) {
+      // Find the question with the next highest ordering ID
+      const nextQuestionIndex = questions.findIndex(q => (q.orderingID ? q.orderingID : 0) >= currentOID);
+      if (nextQuestionIndex == -1) {
+        // We're done! No more questions
+        return { nextQuestion: null, completionPercentage: 100 };
+      }
+      const nextQuestion: QuestionWithOptions = questions[nextQuestionIndex];
+
+      // Check if this question meets our required tags
+      if (selectedTags && nextQuestion.requiredOptions.length > 0) {
+        // Check if any of the required tags are present in our selected tags
+        const hasRequiredTags = nextQuestion.requiredOptions.some(rt => selectedTags.some(st => st == rt));
+        if (!hasRequiredTags) {
+          // We haven't selected any tags that would show this question, so skip it
+          currentOID = nextQuestion.orderingID ? nextQuestion.orderingID + 1 : 0;
+          continue;
+        }
+      }
+
+      // We found the question with the next highest ordering ID (that also matches our required tags)
+      return { nextQuestion, completionPercentage: (nextQuestionIndex / questions.length) * 100 };
+    }
+  }
+
+  public onQueryParamChange(queryParams: Params) {
+    if (!this._questions) {
+      console.error("this._questions is undefined");
+      return;
+    }
+
+    this._selectedTags = this.getNumberArrayParam(queryParams, selectedTagsParam);
+
+    const oid: number = queryParams[orderingIDParam];
+    if (oid) {
+      this._orderingID = oid;
+    } else {
+      this._orderingID = 0; // This marks that query params have loaded, and that there was no ordering ID
+    }
+
+    const { nextQuestion, completionPercentage } = this.getNextQuestion(this._questions, this._orderingID, this._selectedTags);
+    if (completionPercentage == 100 || (nextQuestion ? nextQuestion.orderingID : 0) == this._orderingID) {
+      // Our ordering ID matches! This is our current question
+      this._currentQuestion = nextQuestion;
+      this._completionPercentage = completionPercentage;
+      return;
+    }
+
+    // Navigate if not equal, we're on an ID between questions
+    // TODO: can we remove the '/tag' part and replace with an empty array?
+    this.router.navigate([`/tag`], { queryParamsHandling: 'merge', queryParams: { [orderingIDParam]: nextQuestion ? nextQuestion.orderingID : 0, [imageParam]: this._currentFileID } });
+  }
+
   // Call when navigating to a new file
   public async establishFile(fileID: number, orderingID: number = 0): Promise<void> {
     this.wipeVars();
@@ -82,60 +161,17 @@ export class QuestionManagerService {
     this._currentFileID = fileID;
     this._orderingID = orderingID;
 
-    // Get file and questions from the database
-    const { data: filedata, error: fileerr } = await this.supaService.getFileByID(this._currentFileID);
-    if (fileerr) {
-      throw fileerr;
-    }
-    this._currentFile = filedata as TaggedFileEntry;
-    // Default selected tags to the tags on the file: the query params will overwrite this later if we have something else
-    this._selectedTags = this._currentFile.filetags.map(t => t.tagid);
-
-    const { data: questiondata, error: questionerr } = await this.supaService.listQuestions();
-    if (questionerr) {
-      throw questionerr;
-    }
-    this._questions = questiondata as QuestionWithOptions[];
+    const { currentFile, selectedTags, questions } = await this.getNewLocalParams(fileID);
+    this._currentFile = currentFile;
+    this._selectedTags = selectedTags;
+    this._questions = questions;
 
     if (this._querySubscription) {
       this._querySubscription.unsubscribe();
     }
     // Once the query parameters have loaded (we can probably shorten this further),
     // see if we're between questions and move up if we need to
-    this._querySubscription = this.route.queryParams.subscribe(queryParams => {
-      if (!this._questions) {
-        console.error("this._questions is undefined");
-        return;
-      }
-
-      this._selectedTags = this.getNumberArrayParam(queryParams, selectedTagsParam);
-
-      const oid: number = queryParams[orderingIDParam];
-      if (oid) {
-        this._orderingID = oid;
-      } else {
-        this._orderingID = 0; // This marks that query params have loaded, and that there was no ordering ID
-      }
-
-      // Find next highest ordering ID
-      const nextQuestionIndex = this._questions.findIndex(q => this._orderingID != undefined && (q.orderingID ? q.orderingID : 0) >= this._orderingID);
-      const nextQuestion = nextQuestionIndex >= 0 ? this._questions[nextQuestionIndex] : undefined;
-      if (nextQuestion === undefined) {
-        // We're done! No more questions
-        this._currentQuestion = null;
-        this._completionPercentage = 100;
-        return;
-      }
-      if ((nextQuestion.orderingID ? nextQuestion.orderingID : 0) == this._orderingID) {
-        // Our ordering ID matches! This is our current question
-        this._currentQuestion = nextQuestion;
-        this._completionPercentage = (nextQuestionIndex / this._questions.length) * 100;
-        return;
-      }
-
-      // Navigate if not equal, we're on an ID between questions
-      this.router.navigate([`/tag`], { queryParamsHandling: 'merge', queryParams: { [orderingIDParam]: nextQuestion.orderingID, [imageParam]: this._currentFileID } });
-    });
+    this._querySubscription = this.route.queryParams.subscribe(this.onQueryParamChange.bind(this)); // TODO: test w/out "bind"
   }
 
   public async nextQuestion(): Promise<void> {

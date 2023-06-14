@@ -1,5 +1,5 @@
 {
-    "queryServerAddress": "",
     "supabaseAddress": "",
-    "supabaseKey": ""
+    "supabaseKey": "",
+    "queryServerAddress": ""
 }

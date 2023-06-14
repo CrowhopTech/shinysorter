@@ -1,5 +1,5 @@
 <mat-toolbar color="primary">
-    <h1>Shiny Sorter</h1>
+    <h1 class="pt-4">Shiny Sorter</h1>
 
     <div class="w-6"></div>
 
@@ -14,8 +14,7 @@
     </button>
 
     <div class="w-6"></div>
-
-    <h1 *ngIf="currentMode==='Searching'">Image Search</h1>
-    <h1 *ngIf="currentMode==='Tagging'">Image Tagging</h1>
-    <h1 *ngIf="currentMode==='Settings'">Settings</h1>
+    <h1 *ngIf="currentMode==='Searching'" class="pt-4">Image Search</h1>
+    <h1 *ngIf="currentMode==='Tagging'" class="pt-4">Image Tagging</h1>
+    <h1 *ngIf="currentMode==='Settings'" class="pt-4">Settings</h1>
 </mat-toolbar>
