@@ -7,6 +7,11 @@
             {{ question.questionoptions.length }} options,
             {{ question.mutuallyExclusive ? 'select one' : 'select multiple' }}
             <app-tag-chip [tagIDs]="questionTagIDs" class="ml-3"></app-tag-chip>
+            <div *ngIf="question.requiredOptions.length > 0" class="pl-3 flex flex-row items-center">
+                <b>Only shown when these tags are selected:</b>
+                <app-tag-chip [tagIDs]="[t]" class="ml-3 inline"
+                    *ngFor="let t of question.requiredOptions"></app-tag-chip>
+            </div>
         </mat-panel-description>
     </mat-expansion-panel-header>
     <div *ngIf="question" class="flex flex-row">

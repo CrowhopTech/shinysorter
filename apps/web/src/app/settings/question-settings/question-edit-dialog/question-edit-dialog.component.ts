@@ -25,7 +25,8 @@ export class QuestionEditDialogComponent implements OnInit {
       orderingID: data.question.orderingID,
       questionText: data.question.questionText,
       mutuallyExclusive: data.question.mutuallyExclusive,
-      description: data.question.description
+      description: data.question.description,
+      requiredOptions: data.question.requiredOptions,
     };
     this.questionOptionsCopy = data.question.questionoptions;
     this.mutexString = data.question.mutuallyExclusive ? "Allow only one selection" : "Allow selecting multiple";
@@ -38,6 +39,14 @@ export class QuestionEditDialogComponent implements OnInit {
     }
     // Remove any tags that are already in use in the UI but not yet persisted to the DB
     return this.unusedTags.filter(t => !this.questionOptionsCopy.map(to => to.tagid).includes(t));
+  }
+
+  public getTagByID(id: number): Tag | undefined {
+    return this.tags?.find(t => t.id == id);
+  }
+
+  public printChange($event: any) {
+    console.log($event);
   }
 
   async ngOnInit(): Promise<void> {
