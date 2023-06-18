@@ -4,6 +4,9 @@ import { distinctUntilChanged, filter, fromEvent, map } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
 import { SupabaseService } from '../supabase.service';
 import { QueryManagerService } from './querymanager.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmationDialogComponent } from '../confirmationdialog.component';
 
 @Component({
   selector: 'app-searching',
@@ -13,7 +16,7 @@ import { QueryManagerService } from './querymanager.service';
 export class SearchingComponent implements OnInit {
   viewerInfoOpen: boolean = false;
 
-  constructor(public router: Router, public queryManager: QueryManagerService, public apiUtility: APIUtilityService, public supaService: SupabaseService) { }
+  constructor(public router: Router, public queryManager: QueryManagerService, public apiUtility: APIUtilityService, public supaService: SupabaseService, public dialog: MatDialog, public snackbar: MatSnackBar) { }
 
   get currentFileTags(): number[] | undefined {
     return this.queryManager.viewingFile?.filetags.map((t: any) => t.tagid);
@@ -35,5 +38,28 @@ export class SearchingComponent implements OnInit {
       this.queryManager.ngOnInit(),
       this.apiUtility.updateTagCache()
     ]);
+  }
+
+  deleteClick() {
+    // Show confirmation first: if confirmed, then actually do the delete
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: "Delete File",
+        message: "Are you sure you want to delete this file? Once you do, it's gone forever!"
+      }
+    });
+    dialogRef.afterClosed().subscribe(async (result: boolean) => {
+      if (result) {
+        try {
+          // await this.questionManager.deleteCurrentFile();
+          // this.questionManager.nextFile();
+          await this.queryManager.deleteCurrentViewingFile();
+          this.queryManager.viewClose();
+          this.snackbar.open("File deleted successfully", undefined, { duration: 7500 });
+        } catch (error: any) {
+          this.snackbar.open(`Failed to delete file: ${error.toString()}`, undefined, { duration: 7500 });
+        }
+      }
+    });
   }
 }

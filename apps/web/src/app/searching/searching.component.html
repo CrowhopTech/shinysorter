@@ -2,20 +2,24 @@
 <div class="h-screen flex flex-col">
     <div id="image-viewer-root" class="w-full h-full fixed"
         *ngIf="queryManager.viewingFileID != -1 && queryManager.viewingFile">
-        <button mat-icon-button disableRipple class="viewer-button absolute right-2 top-2"
-            (click)="queryManager.viewClose()">
+        <div class="absolute left-0 top-0 w-full h-fit flex flex-row p-1 space-x-2">
+            <button mat-icon-button disableRipple id="infoButton" class="viewer-button"
+                (click)="viewerInfoOpen = !viewerInfoOpen">
+                <mat-icon color="{{ viewerInfoOpen ? 'accent' : '' }}">info</mat-icon>
+            </button>
+            <button mat-icon-button disableRipple id="downloadButton" class="viewer-button"
+                (click)="supaService.downloadFileContents(queryManager.viewingFile.filename)">
+                <mat-icon>download</mat-icon>
+            </button>
+            <button mat-icon-button disableRipple id="deleteButton" class="viewer-button" (click)="deleteClick()">
+                <mat-icon>delete_forever</mat-icon>
+            </button>
+        </div>
+        <button mat-icon-button disableRipple id="closeButton" class="viewer-button" (click)="queryManager.viewClose()">
             <mat-icon>close</mat-icon>
         </button>
-        <button mat-icon-button disableRipple class="viewer-button absolute left-2 top-2"
-            (click)="viewerInfoOpen = !viewerInfoOpen">
-            <mat-icon color="{{ viewerInfoOpen ? 'accent' : '' }}">info</mat-icon>
-        </button>
-        <button mat-icon-button disableRipple class="viewer-button absolute left-16 top-2"
-            (click)="supaService.downloadFileContents(queryManager.viewingFile.filename)">
-            <mat-icon>download</mat-icon>
-        </button>
         <div id="info-bar" [class.viewer-open]="viewerInfoOpen" class="fixed w-full text-white">
-            <div class="relative left-28 p-3 flex flex-col">
+            <div class="relative left-48 p-3 flex flex-col">
                 <h1>{{ queryManager.viewingFile.filename }}</h1>
                 <div *ngIf="queryManager.viewingFile != undefined">
                     <app-tag-chip [tagIDs]="currentFileTags"></app-tag-chip>
