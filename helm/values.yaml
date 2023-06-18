@@ -18,7 +18,7 @@ webdav:
 
 importer:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-importer"
-  tag: "alpha-v0.3.5"
+  tag: "alpha-v0.4.0"
   importSubdirectory: ""
   nodeSelector: null
   tolerations: null
@@ -28,7 +28,7 @@ importer:
 
 frontend:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-frontend"
-  tag: "alpha-v0.3.5"
+  tag: "alpha-v0.4.0"
   prefix: "ui"
   nodeSelector: null
   tolerations: null
@@ -36,14 +36,14 @@ frontend:
 queryServer:
   port: 3268
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-queryserver"
-  tag: "alpha-v0.3.5"
+  tag: "alpha-v0.4.0"
   prefix: "query"
   nodeSelector: null
   tolerations: null
 
 backup:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-backuptool"
-  tag: "alpha-v0.3.5"
+  tag: "alpha-v0.4.0"
 
 supabase:
   jwtSecret: ""
