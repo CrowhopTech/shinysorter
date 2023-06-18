@@ -74,8 +74,15 @@ export class SupabaseService {
         return this.supabase.auth.signOut();
     }
 
-    getFileByID(id: number) {
-        return this.supabase.from("files").select("*, filetags(tagid)").eq("id", id).single();
+    async getFileByID(id: number) {
+        const { data, error } = await this.supabase.from("files").select("*, filetags(tagid)").eq("id", id).returns<TaggedFileEntry>().maybeSingle();
+        if (error) {
+            if (error.code == "PGRST116") { // JSON object requested, multiple (or no) rows returned
+                return { data: null, error: null };
+            }
+            return { data: null, error: error };
+        }
+        return { data: data, error: null };
     }
 
     countFiles(includeTags: number[], includeMode: SearchMode, excludeTags: number[], excludeMode: SearchMode, tagged: boolean, limit: number = 10, cont: number = 0): Promise<{ count: number, error: Error | null; }> {
@@ -138,6 +145,24 @@ export class SupabaseService {
             }
             resolve({ data: response.data, error: null });
         });
+    }
+
+    async deleteFile(id: number) {
+        const result = await this.getFileByID(id);
+        const data = result.data;
+        if (result.error) {
+            return Promise.reject(`Failed to get file by ID ${id}: ${result.error}`);
+        }
+
+        await this.supabase.from("filetags").delete().eq("fileid", id);
+        await this.supabase.from("files").delete().eq("id", id);
+
+        if (data) {
+            await this.supabase.storage.from("files").remove([data.filename]);
+            await this.supabase.storage.from("thumbs").remove([data.storageID]);
+        }
+
+        return Promise.resolve();
     }
 
     // ===== File Contents

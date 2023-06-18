@@ -16,7 +16,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { MatInput, MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
@@ -49,6 +50,7 @@ import { QuestionEditDialogComponent, TagOptionEditComponent } from './settings/
 import { TagChipComponent } from './tag-chip/tag-chip.component';
 import { AppService } from './app.service';
 import { TOKEN } from './app.service';
+import { ConfirmationDialogComponent } from './confirmationdialog.component';
 
 // Use this to load config values **at runtime**! See the comment values around this file for a full example (mainly see providers in the module)
 
@@ -90,7 +92,8 @@ export function initApp(appService: AppService) {
     TagOptionEditComponent,
     QuestionDeleteDialogComponent,
     QuestionReorderDialogComponent,
-    TagChipComponent
+    TagChipComponent,
+    ConfirmationDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -109,6 +112,7 @@ export function initApp(appService: AppService) {
     MatFormFieldModule,
     MatGridListModule,
     MatInputModule,
+    MatMenuModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatRadioModule,

@@ -4,6 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
 import { QuestionManagerService } from './questionmanager.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmationdialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-tagging',
@@ -16,7 +19,7 @@ export class TaggingComponent implements OnInit {
 
   queryParamSub: Subscription | undefined = undefined;
 
-  constructor(public router: Router, private route: ActivatedRoute, public apiUtility: APIUtilityService, public questionManager: QuestionManagerService) { }
+  constructor(public router: Router, private route: ActivatedRoute, public apiUtility: APIUtilityService, public questionManager: QuestionManagerService, public dialog: MatDialog, public snackbar: MatSnackBar) { }
 
   pastelColorForText(text: string | undefined): string {
     if (!text) {
@@ -46,12 +49,25 @@ export class TaggingComponent implements OnInit {
     this.questionManager.previousQuestion();
   }
 
-  skipImage() {
-    // TODO: fix this better so we don't have a chance to redirect to the same image again
-    //       Maybe add a "not" flag, so we go to any image except that one?
-
-    // TODO: I think this is broken cuz we need to add the specific "no params" thing
-    this.router.navigate(["/tag"]);
+  deleteFile() {
+    // Show confirmation first: if confirmed, then actually do the delete
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: "Delete File",
+        message: "Are you sure you want to delete this file? Once you do, it's gone forever!"
+      }
+    });
+    dialogRef.afterClosed().subscribe(async (result: boolean) => {
+      if (result) {
+        try {
+          await this.questionManager.deleteCurrentFile();
+          this.questionManager.nextFile();
+          this.snackbar.open("File deleted successfully", undefined, { duration: 7500 });
+        } catch (error: any) {
+          this.snackbar.open(`Failed to delete file: ${error.toString()}`, undefined, { duration: 7500 });
+        }
+      }
+    });
   }
 
   toolbarNavigate(path: string) {
@@ -96,5 +112,5 @@ export class TaggingComponent implements OnInit {
 
       this.router.navigate(["/tag"], { queryParams: { "image": untaggedFile.id } });
     });
-  }
+  };
 }
