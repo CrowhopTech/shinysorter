@@ -12,7 +12,7 @@ export const includeModeParam = "includeMode";
 export const excludeModeParam = "excludeMode";
 export const viewingFileParam = "view";
 
-export const pageSize = 3;
+export const pageSize = 50;
 
 export function getNumberArrayParam(params: Params, param: string): number[] {
   const val: string = params[param];
