@@ -214,8 +214,15 @@ export class QuestionManagerService {
 
   public nextFile() {
     this.wipeVars();
-    this.wipeVars();
     this.router.navigate(["/tag"], { queryParams: { [imageParam]: null, [orderingIDParam]: null, [selectedTagsParam]: null } });
+  }
+
+  public async deleteCurrentFile(): Promise<void> {
+    if (!this._currentFileID) {
+      return;
+    }
+
+    return this.supaService.deleteFile(this._currentFileID);
   }
 
   public addTag(tag: number) {

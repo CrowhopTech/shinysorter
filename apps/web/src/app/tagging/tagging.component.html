@@ -29,12 +29,21 @@
                 (tagAdded)="tagAdded($event)" (tagRemoved)="tagRemoved($event)"
                 [selectedTags]="questionManager.selectedTags">
             </app-question>
-            <div class="flex flex-row-reverse py-3">
+            <div class="flex flex-row-reverse items-center py-3">
                 <button mat-raised-button class="mx-1 flex-grow-0" color="primary" (click)="nextQuestion()">
                     {{questionManager.completionPercentage == 100 ? "Submit" : "Next Question"}}
                 </button>
                 <button mat-raised-button class="mx-1 flex-grow-0" color="basic" (click)="prevQuestion()">Back</button>
                 <div class="flex-grow"></div>
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More Options" class="p-0">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="deleteFile()">
+                        <mat-icon>delete_forever</mat-icon>
+                        <span>Delete this file</span>
+                    </button>
+                </mat-menu>
                 <button mat-raised-button class="mx-1 flex-grow-0" color="basic" (click)="questionManager.nextFile()">
                     Skip This Image
                 </button>

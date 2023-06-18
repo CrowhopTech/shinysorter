@@ -51,20 +51,13 @@ export class FileviewerComponent implements OnInit {
     this._fileIDChanged.subscribe(async (value: number) => {
       const { data, error } = await this.supaService.getFileByID(value);
       if (error) {
-        this.imageNotFound = false;
-        if (error instanceof HttpErrorResponse) {
-          if (error.status == 404) {
-            this.imageNotFound = true;
-            return;
-          }
-          this.fileError = error.message;
-        } else {
-          this.fileError = error.toString();
-        }
+        this.fileError = `${typeof error}: ${error.message}`;
         return;
       }
-      if (data as TaggedFileEntry) {
+      if (data) {
         setFile(data);
+      } else {
+        this.imageNotFound = true;
       }
     });
   }
