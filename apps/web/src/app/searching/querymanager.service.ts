@@ -184,6 +184,14 @@ export class QueryManagerService {
     this.viewFile(lastFileID);
   }
 
+  public deleteCurrentViewingFile(): Promise<void> {
+    if (!this._viewingFileID) {
+      return Promise.reject("No file to delete");
+    }
+
+    return this.supaService.deleteFile(this._viewingFileID);
+  }
+
   public searchRequestInFlight() {
     return this._searchSubscription && !this._searchSubscription.closed;
   }
