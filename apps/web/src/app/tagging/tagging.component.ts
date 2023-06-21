@@ -94,8 +94,14 @@ export class TaggingComponent implements OnInit {
         return;
       }
 
+      const avoidFileRaw = params.get("avoidFile");
+      var avoidFile: number | undefined = undefined;
+      if (avoidFileRaw != null && avoidFileRaw != "") {
+        avoidFile = parseInt(avoidFileRaw);
+      }
+
       // Handle if we need to pick a new image
-      const { file: untaggedFile, error } = await this.apiUtility.getRandomUntaggedFile();
+      const { file: untaggedFile, error } = await this.apiUtility.getRandomUntaggedFile(avoidFile);
       if (error) {
         if (error instanceof HttpErrorResponse) {
           this.navigateError = error.message;

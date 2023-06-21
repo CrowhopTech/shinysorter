@@ -6,6 +6,7 @@ import { Question, QuestionWithOptions, SupabaseService, TaggedFileEntry } from 
 const imageParam = "image";
 const selectedTagsParam = "selectedTags";
 const orderingIDParam = "orderingID";
+const avoidFileParam = "avoidFile";
 
 // Responsible for:
 // * Managing which question we're on (query params, navigating to next question, etc.)
@@ -213,8 +214,9 @@ export class QuestionManagerService {
   }
 
   public nextFile() {
+    const lastFileID = this._currentFileID;
     this.wipeVars();
-    this.router.navigate(["/tag"], { queryParams: { [imageParam]: null, [orderingIDParam]: null, [selectedTagsParam]: null } });
+    this.router.navigate(["/tag"], { queryParams: { [imageParam]: null, [orderingIDParam]: null, [selectedTagsParam]: null, [avoidFileParam]: lastFileID } });
   }
 
   public async deleteCurrentFile(): Promise<void> {

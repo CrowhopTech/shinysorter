@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
 import { AppService } from './app.service';
 import { SupabaseService, Tag, TaggedFileEntry } from './supabase.service';
+import { AxiosError } from 'axios';
 
 @Injectable({
   providedIn: 'root'
@@ -35,16 +36,11 @@ export class APIUtilityService {
     return this.tagsMap.get(tagID);
   }
 
-  public async getRandomUntaggedFile(): Promise<{ file: TaggedFileEntry | null, error: Error | null; }> {
-    const { data, error } = await this.supaService.listFiles([], "all", [], "all", false, 10);
+  public async getRandomUntaggedFile(avoidFile?: number): Promise<{ file: TaggedFileEntry | null, error: Error | null; }> {
+    const { data: file, error } = await this.supaService.getRandomFile([], "all", [], "all", false, avoidFile);
     if (error) {
       return { file: null, error: error };
     }
-    if (data.length == 0) {
-      return { file: null, error: null };
-    }
-    const castData = data as TaggedFileEntry[];
-    data.sort((a, b) => Math.random() - 0.5);
-    return { file: castData[0], error: null };
+    return { file, error: null };
   }
 }
