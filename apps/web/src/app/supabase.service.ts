@@ -14,6 +14,7 @@ import { SearchMode } from './filequery';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { FileSaverService } from 'ngx-filesaver';
 import { Database } from '../schema';
+import * as path from 'path';
 
 export interface Profile {
     id?: string;
@@ -141,7 +142,42 @@ export class SupabaseService {
                 params: params,
             });
             if (response.status != 200) {
-                resolve({ data: [], error: new Error(`unexpected status from listFiles ${response.status} ${response.statusText}`) });
+                resolve({ data: [], error: new Error(`unexpected status from listFiles: ${response.status} ${response.statusText}`) });
+            }
+            resolve({ data: response.data, error: null });
+        });
+    }
+
+    getRandomFile(includeTags: number[], includeMode: SearchMode, excludeTags: number[], excludeMode: SearchMode, tagged: boolean, avoidFile?: number): Promise<{ data: TaggedFileEntry | null, error: null; } | { data: null, error: Error; }> {
+        return new Promise(async (resolve) => {
+            if (!this.appService.settings) {
+                resolve({ data: null, error: new Error("appService settings not set") });
+                return;
+            }
+
+            let params: any = {};
+            if (includeTags.length > 0) {
+                params.includeTags = includeTags;
+                params.includeMode = includeMode;
+            }
+            if (excludeTags.length > 0) {
+                params.excludeTags = excludeTags;
+                params.excludeMode = excludeMode;
+            }
+            params.tagged = tagged;
+            if (avoidFile) {
+                params.avoidFile = avoidFile;
+            }
+
+            const response: AxiosResponse<TaggedFileEntry> = await axios.get<TaggedFileEntry>(this.appService.settings.queryServerAddress + "/random", {
+                params: params,
+                validateStatus: (status: number) => status == 200 || status == 404,
+            });
+            if (response.status == 404) {
+                resolve({ data: null, error: null });
+            }
+            if (response.status != 200) {
+                resolve({ data: null, error: new Error(`unexpected status from getRandomFile: ${response.status} ${response.statusText}`) });
             }
             resolve({ data: response.data, error: null });
         });

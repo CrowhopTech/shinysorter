@@ -5,6 +5,7 @@ const includeTagsParam = "includeTags";
 const includeModeParam = "includeMode";
 const excludeTagsParam = "excludeTags";
 const excludeModeParam = "excludeMode";
+const avoidFileParam = "avoidFile";
 const continueParam = "continue";
 const limitParam = "limit";
 const countParam = "getCount";
@@ -99,108 +100,190 @@ function parseBooleanParam(req: Request, param: string, def: boolean): boolean {
     throw new Error("unhandled type case in parseString!");
 }
 
-const getQuery = async (req: Request, res: Response, next: NextFunction) => {
+function getClient(): PGClient {
     const pgConnectionString = process.env.PG_CONNECTION_STRING;
     if (!pgConnectionString || pgConnectionString == "") {
-        return res.status(500).json("No Postgres connection string provided in client");
+        throw new Error("No Postgres connection string provided in client");
     }
     const client = new PGClient({
         connectionString: pgConnectionString,
     });
+    return client;
+}
 
+class FileQueryParams {
+    includeTags: number[] = [];
+    excludeTags: number[] = [];
+    includeMode: "all" | "any" = "all";
+    excludeMode: "all" | "any" = "all";
+    avoidFile: number | undefined = undefined;
+    continueID: string | undefined = undefined;
+    limit: number | undefined = undefined;
+    hasContent: boolean = true;
+    tagged: boolean = true;
+    getCount: boolean | undefined = undefined;
+    getRandom: boolean = false;
+}
+
+function parseAllQueryParameters(req: Request, allowContinue: boolean, allowLimit: boolean, allowCount: boolean): FileQueryParams {
+    let params = new FileQueryParams();
+    params.includeTags = parseNumberArrayParam(req, includeTagsParam);
+    params.excludeTags = parseNumberArrayParam(req, excludeTagsParam);
+    params.includeMode = parseQueryModeParam(req, includeModeParam, "all");
+    params.excludeMode = parseQueryModeParam(req, excludeModeParam, "all");
+    params.avoidFile = parseNumberParam(req, avoidFileParam, -1);
+    if (allowContinue) {
+        params.continueID = parseStringParam(req, continueParam, "");
+    }
+    if (allowLimit) {
+        params.limit = parseNumberParam(req, limitParam, 10);
+    }
+    params.hasContent = parseBooleanParam(req, hasContentParam, true);
+    params.tagged = parseBooleanParam(req, taggedParam, true);
+    if (allowCount) {
+        params.getCount = parseBooleanParam(req, countParam, false);
+    }
+
+    return params;
+};
+
+function generateSQLQuery(params: FileQueryParams): { queryString: string, queryArgs: any[]; } {
+    if (params.getCount && params.getRandom) {
+        throw new Error("Cannot get count and random at the same time");
+    }
+
+    let selectStatement = params.getCount ? 'count(*) as filecount' : '*';
+
+    let queryIdx = 2; // 1 params already in there
+    let innerQueryString = `WHERE files."hasBeenTagged"=$1`;
+    let queryArgs: any[] = [params.tagged];
+
+    if (params.continueID && params.continueID.length > 0) {
+        innerQueryString += ` AND files.id>\$${queryIdx++}`;
+        queryArgs.push(params.continueID);
+    }
+
+    if (params.avoidFile && params.avoidFile >= 0) {
+        innerQueryString += ` AND files.id!=\$${queryIdx++}`;
+        queryArgs.push(params.avoidFile);
+    }
+
+    const orderBy = params.getRandom ? "random()" : "files.id";
+
+    let queryString = `SELECT ${selectStatement} FROM (
+        SELECT files.*, storage.objects.metadata, storage.objects.name, ARRAY_AGG(filetags.tagid ORDER BY filetags.tagid) AS tags
+        FROM files
+        LEFT JOIN filetags ON filetags.fileid = files.id
+        LEFT JOIN storage.objects ON storage.objects.id = files."storageID" AND storage.objects.bucket_id = 'test-bucket'
+        ${innerQueryString}
+        GROUP BY files.id, storage.objects.id ORDER BY ${orderBy}
+    ) AS fwt`;
+
+    let tagQueries: string[] = [];
+
+    if (params.includeTags.length > 0) {
+        let queries: string[] = [];
+        params.includeTags.forEach(t => {
+            queries.push(`\$${queryIdx++}=ANY(tags)`);
+            queryArgs.push(t);
+        });
+        const joiner = (params.includeMode == "all") ? " AND " : " OR ";
+        tagQueries.push(`(${queries.join(joiner)})`);
+    }
+
+    if (params.excludeTags.length > 0) {
+        let queries: string[] = [];
+        params.excludeTags.forEach(t => {
+            queries.push(`\$${queryIdx++}=ANY(tags)`);
+            queryArgs.push(t);
+        });
+        const joiner = (params.excludeMode == "all") ? " AND " : " OR ";
+        tagQueries.push(`NOT (${queries.join(joiner)})`);
+    }
+
+    if (tagQueries.length > 0) {
+        queryString += " WHERE " + tagQueries.join(" AND ");
+    }
+    if (!params.getCount && params.limit && params.limit > 0) {
+        queryString += ` LIMIT \$${queryIdx++}`;
+        queryArgs.push(params.limit);
+    }
+    return { queryString, queryArgs };
+}
+
+// Converts a database result into the format that would be returned by PostgREST
+function convertToTaggedFileEntry(input: any): any {
+    // Move the "tags" field (array of strings) to the "filetags" field (array of {"tagid": number} structs)
+    input.filetags = [];
+    let existingTags = input.tags as string[];
+    input.tags = undefined;
+    if (!existingTags) {
+        return input;
+    }
+    input.filetags = existingTags.filter(t => t != null).map(tString => { return { "tagid": parseInt(tString) }; });
+    return input;
+}
+
+const getQuery = async (req: Request, res: Response, next: NextFunction) => {
+    let client: PGClient | undefined = undefined;
     try {
+        client = getClient();
         await client.connect();
 
-        let includeTags = parseNumberArrayParam(req, includeTagsParam);
-        let excludeTags = parseNumberArrayParam(req, excludeTagsParam);
-        let includeMode: "all" | "any" = parseQueryModeParam(req, includeModeParam, "all");
-        let excludeMode: "all" | "any" = parseQueryModeParam(req, excludeModeParam, "all");
-        let continueID = parseStringParam(req, continueParam, "");
-        let limit = parseNumberParam(req, limitParam, 10);
-        let hasContent = parseBooleanParam(req, hasContentParam, true);
-        let tagged = parseBooleanParam(req, taggedParam, true);
-        let getCount = parseBooleanParam(req, countParam, false);
+        const queryParams = parseAllQueryParameters(req, true, true, true);
 
-        let selectStatement = getCount ? 'count(*) as filecount' : '*';
-
-        let queryIdx = 2; // 1 params already in there
-        let innerQueryString = `WHERE files."hasBeenTagged"=$1`;
-        let queryArgs: any[] = [tagged];
-
-        if (continueID.length > 0) {
-            innerQueryString += ` AND files.id>\$${queryIdx++}`;
-            queryArgs.push(continueID);
-        }
-
-        let queryString = `SELECT ${selectStatement} FROM (
-            SELECT files.*, storage.objects.metadata, storage.objects.name, ARRAY_AGG(filetags.tagid ORDER BY filetags.tagid) AS tags
-            FROM files
-            LEFT JOIN filetags ON filetags.fileid = files.id
-            LEFT JOIN storage.objects ON storage.objects.id = files."storageID" AND storage.objects.bucket_id = 'test-bucket'
-            ${innerQueryString}
-            GROUP BY files.id, storage.objects.id ORDER BY files.id
-        ) AS fwt`;
-
-        let tagQueries: string[] = [];
-
-        if (includeTags.length > 0) {
-            let queries: string[] = [];
-            includeTags.forEach(t => {
-                queries.push(`\$${queryIdx++}=ANY(tags)`);
-                queryArgs.push(t);
-            });
-            const joiner = (includeMode == "all") ? " AND " : " OR ";
-            tagQueries.push(`(${queries.join(joiner)})`);
-        }
-
-        if (excludeTags.length > 0) {
-            let queries: string[] = [];
-            excludeTags.forEach(t => {
-                queries.push(`\$${queryIdx++}=ANY(tags)`);
-                queryArgs.push(t);
-            });
-            const joiner = (excludeMode == "all") ? " AND " : " OR ";
-            tagQueries.push(`NOT (${queries.join(joiner)})`);
-        }
-
-        if (tagQueries.length > 0) {
-            queryString += " WHERE " + tagQueries.join(" AND ");
-        }
-        if (!getCount && limit > 0) {
-            queryString += ` LIMIT \$${queryIdx++}`;
-            queryArgs.push(limit);
-        }
+        const { queryString, queryArgs } = generateSQLQuery(queryParams);
 
         console.log(`Running with query:\n${queryString}\nArgs: ${queryArgs}`);
 
         let result = await client.query(queryString, queryArgs);
 
-        if (getCount) {
+        if (queryParams.getCount) {
             let count = result.rows.map(input => parseInt(input.filecount))[0];
             return res.status(200).json({ "count": count });
         }
 
-        // Do a bit of reformatting to make sure we match the format expected if we used a supabase join (like `from('tags').select('*, filetags(tagid)')`)
-        let formattedResult = result.rows.map(input => {
-            // Move the "tags" field (array of strings) to the "filetags" field (array of {"tagid": number} structs)
-            input.filetags = [];
-            let existingTags = input.tags as string[];
-            input.tags = undefined;
-            if (!existingTags) {
-                return input;
-            }
-            console.log(existingTags);
-            input.filetags = existingTags.filter(t => t != null).map(tString => { return { "tagid": parseInt(tString) }; });
-            return input;
-        });
+        const formattedResult = result.rows.map(convertToTaggedFileEntry);
+        return res.status(200).json(formattedResult);
+    } catch (err: any) {
+        console.error(err);
+        return res.status(500).json(err);
+    } finally {
+        if (client) {
+            client.end((err: Error) => { if (err !== undefined) { console.warn(`Failed to close postgres connection: ${err}`); } });
+        }
+    }
+};
+
+const getRandomFile = async (req: Request, res: Response, next: NextFunction) => {
+    let client: PGClient | undefined = undefined;
+    try {
+        client = getClient();
+        await client.connect();
+
+        const queryParams = parseAllQueryParameters(req, false, false, false);
+        queryParams.getRandom = true;
+        queryParams.limit = 1;
+
+        const { queryString, queryArgs } = generateSQLQuery(queryParams);
+
+        console.log(`Running with getRandom query:\n${queryString}\nArgs: ${queryArgs}`);
+
+        let result = await client.query(queryString, queryArgs);
+        if (result.rowCount == 0) {
+            return res.status(404).json(null);
+        }
+        const formattedResult = convertToTaggedFileEntry(result.rows[0]);
 
         return res.status(200).json(formattedResult);
     } catch (err: any) {
         console.error(err);
         return res.status(500).json(err);
     } finally {
-        client.end((err: Error) => console.warn(`Failed to close postgres connection: ${err}`));
+        if (client) {
+            client.end((err: Error) => { if (err !== undefined) { console.warn(`Failed to close postgres connection: ${err}`); } });
+        }
     }
 };
 
-export default { getQuery };
+export default { getQuery, getRandomFile };
