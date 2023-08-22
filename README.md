@@ -22,4 +22,28 @@ Secondly, this is built on top of Kubernetes (but can be converted into Docker S
 
 ## Development
 
-*Coming soon!*
+### Web Development Config
+To run the web development server locally, you must change `apps/web/src/assets/app.config.json` to contain:
+* The address of the Supabase API: looks like `http://<address>:8000`
+* The Supabase key: is a JWT
+* The address of the query server: looks like `http://<address>:3268/query`
+
+After this is done, you can run `nx run web:serve:development` and develop as normal. The path will have a `/replacemebasehref` in it:
+this is expected, and is a token we replace at runtime in the Docker image to enable dynamic base paths.
+
+### Query Server Development
+Running the query server is much simpler: it is simply `PG_CONNECTION_STRING="postgres://postgres:<pgpass>@<address>:5432/postgres" nx run queryserver:serve`. This Postgres connection string can be obtained by using a locally running Supabase install, or a full deployment.
+
+### Importer Development
+The importer can be provided with an env file. For example:
+```
+SUPABASE_ADDRESS=http://<address>:8000
+SUPABASE_KEY="<JWT Supabase key>"
+BUCKET_NAME=files
+THUMBS_BUCKET_NAME=thumbs
+IMPORT_DIRECTORY=<existing directory of your choosing, such as 'import'>
+```
+You can then run `env-cmd -f <env file> nx run importer:serve`
+
+### Backup Tool
+# TODO: The backup tool has a less official development method for now.
