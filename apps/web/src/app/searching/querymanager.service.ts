@@ -139,19 +139,6 @@ export class QueryManagerService {
     return this._searchResult.findIndex(f => f.id == this._viewingFileID) > 0;
   }
 
-  public viewCanGoForward(): boolean {
-    if (!this._searchResult) {
-      return false;
-    }
-    const idx = this._searchResult.findIndex(f => f.id == this._viewingFileID);
-    if (idx == -1) {
-      return false;
-    }
-    // If we're at the end of our current files, and we already tried to get more
-    // then we really can't go forward. Otherwise, let us try.
-    return idx != this._searchResult.length - 1 || !this._noMoreResults;
-  }
-
   public viewNextFile() {
     // Get index of current file
     if (!this._searchResult) {
@@ -237,6 +224,11 @@ export class QueryManagerService {
       files.forEach(f => this._searchResult?.push(f));
     } else {
       this._searchResult = files;
+    }
+    if (this._resultsCount && this._searchResult && this._searchResult.length >= this._resultsCount) {
+      this._noMoreResults = true;
+    } else {
+      this._noMoreResults = false;
     }
     this._searchError = undefined;
     this.searchResultReady.emit();
