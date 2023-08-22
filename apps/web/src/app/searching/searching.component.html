@@ -61,9 +61,8 @@
                         (click)="queryManager.viewFile(file.id)" />
                 </mat-grid-tile>
             </mat-grid-list>
-            <button
-                *ngIf="!queryManager.searchRequestInFlight() && queryManager.searchResult != undefined && queryManager.searchResult.length > 0 && queryManager.searchError == undefined && !queryManager.noMoreResults"
-                mat-flat-button class="m-1" color="primary" (click)="queryManager.getMoreResults()">
+            <button *ngIf="!queryManager.searchRequestInFlight() && !queryManager.noMoreResults" mat-flat-button
+                class="m-1" color="primary" (click)="queryManager.getMoreResults()">
                 Load More Results
                 <mat-icon>expand_more</mat-icon>
             </button>
