@@ -9,14 +9,12 @@
     z-index: 300
 
     #info-bar
-        $info-bar-height: 128px
-
         background-color: rgba(0, 0, 0, 90%)
         z-index: 400
 
         transition: top .4s
-        height: $info-bar-height
-        top: -$info-bar-height
+        height: fit-content
+        top: -100%
 
         &.viewer-open
             top: 0

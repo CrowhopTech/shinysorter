@@ -19,8 +19,11 @@
             <mat-icon>close</mat-icon>
         </button>
         <div id="info-bar" [class.viewer-open]="viewerInfoOpen" class="fixed w-full text-white">
-            <div class="relative left-48 p-3 flex flex-col">
-                <h1>{{ queryManager.viewingFile.filename }}</h1>
+            <div class="relative max-w-full p-3 flex flex-col">
+                <div class="flex flex-row">
+                    <div class="w-40"><!--Spacer to go past buttons--></div>
+                    <h1>{{ queryManager.viewingFile.filename }}</h1>
+                </div>
                 <div *ngIf="queryManager.viewingFile != undefined">
                     <app-tag-chip [tagIDs]="currentFileTags"></app-tag-chip>
                 </div>
