@@ -54,6 +54,8 @@ spec:
             - name: pg-roles
               mountPath: /docker-entrypoint-initdb.d/roles.sql
               subPath: "roles.sql"
+          resources:
+            {{ toYaml .Values.supabase.postgresql.resources | nindent 12 }}
       volumes:
         - name: pg-data
           persistentVolumeClaim:

@@ -57,3 +57,5 @@ spec:
           volumeMounts:
             - mountPath: /import
               name: importdir
+          resources:
+            {{- toYaml .Values.importer.resources | nindent 12 }}

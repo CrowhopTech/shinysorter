@@ -97,6 +97,8 @@ spec:
         - name: api
           containerPort: 9999
           protocol: TCP
+        resources:
+          {{- toYaml .Values.supabase.auth.resources | nindent 10}}
 ---
 apiVersion: v1
 kind: Service

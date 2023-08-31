@@ -51,6 +51,8 @@ spec:
         - name: meta
           containerPort: 8080
           protocol: TCP
+        resources:
+          {{- toYaml .Values.supabase.meta.resources | nindent 12}}
 ---
 apiVersion: v1
 kind: Service

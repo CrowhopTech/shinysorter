@@ -51,6 +51,8 @@ spec:
         volumeMounts:
         - name: kong-cfg
           mountPath: /var/lib/kong
+        resources:
+          {{ toYaml .Values.supabase.kong.resources | nindent 10 }}
       volumes:
         - name: kong-cfg
           secret:

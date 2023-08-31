@@ -15,6 +15,13 @@ webdav:
     enabled: true
     type: pvc
     existingClaim: shinysorter-importdir
+  resources:
+    limits:
+      # No CPU limit
+      memory: 1Gi # Handling file uploads, set a bigger memory limit in case
+    requests:
+      cpu: 10m
+      memory: 50Mi
 
 importer:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-importer"
@@ -25,6 +32,13 @@ importer:
   storage:
     pvcAnnotations: {}
     storageClassName: null
+  resources:
+    limits:
+      # No CPU limit
+      memory: 2Gi # Expect this to be relatively high as it's reading file contents into memory
+    requests:
+      cpu: 50m
+      memory: 500Mi
 
 frontend:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-frontend"
@@ -32,6 +46,13 @@ frontend:
   prefix: "ui"
   nodeSelector: null
   tolerations: null
+  resources:
+    limits:
+      # No CPU limit
+      memory: 250Mi
+    requests:
+      cpu: 10m
+      memory: 100Mi
 
 queryServer:
   port: 3268
@@ -40,6 +61,13 @@ queryServer:
   prefix: "query"
   nodeSelector: null
   tolerations: null
+  resources:
+    limits:
+      # No CPU limit
+      memory: 1Gi
+    requests:
+      cpu: 10m
+      memory: 500Mi
 
 backup:
   image: "registry.home.crowhop.tech:8080/shinysorter/shinysorter-backuptool"
@@ -58,29 +86,85 @@ supabase:
     storage:
       pvcAnnotations: {}
       storageClassName: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 1Gi # Set high memory limit to ensure indices have space in memory
+      requests:
+        cpu: 250m # Set high CPU request to ensure queries go fast
+        memory: 250Mi
   studio:
     port: 3000
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 500Mi
+      requests:
+        cpu: 10m
+        memory: 250Mi
   rest:
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 50Mi
   auth:
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 250Mi
+      requests:
+        cpu: 10m
+        memory: 50Mi
   realtime:
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 500Mi
+      requests:
+        cpu: 50m
+        memory: 100Mi
   storage:
     nodeSelector: null
     tolerations: null
     storage:
       pvcAnnotations: {}
       storageClassName: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 1Gi # Expect this to be relatively high as it's dealing with file contents
+      requests:
+        cpu: 50m # Set this relatively high to ensure we can serve file contents quickly
+        memory: 500Mi
   meta:
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 500Mi
+      requests:
+        cpu: 10m
+        memory: 100Mi
   kong:
     port: 8000
     nodeSelector: null
     tolerations: null
+    resources:
+      limits:
+        # No CPU limit
+        memory: 1Gi
+      requests:
+        cpu: 10m
+        memory: 500Mi
