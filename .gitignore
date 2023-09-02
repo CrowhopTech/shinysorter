@@ -44,3 +44,5 @@ Thumbs.db
 # Env Configurations
 .env.default
 .env.production
+
+apps/web/src/assets/app.config.json

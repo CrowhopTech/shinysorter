@@ -16,8 +16,13 @@ export class ToolbarComponent implements OnInit {
 
   @Output() onSettingsClick = new EventEmitter();
 
+  @Output() onSidebarClick = new EventEmitter();
+
   @Input()
   currentMode: ToolbarMode = "Searching";
+
+  @Input()
+  sidebarButtonVisible: boolean = false;
 
   constructor() { }
 
@@ -28,13 +33,13 @@ export class ToolbarComponent implements OnInit {
     if (this.currentMode != newMode) {
       this.modeChange.emit(newMode);
       if (newMode === 'Tagging') {
-        this.onTagClick.emit()
+        this.onTagClick.emit();
       }
       if (newMode === 'Searching') {
-        this.onSearchClick.emit()
+        this.onSearchClick.emit();
       }
       if (newMode === 'Settings') {
-        this.onSettingsClick.emit()
+        this.onSettingsClick.emit();
       }
     }
     this.currentMode = newMode;

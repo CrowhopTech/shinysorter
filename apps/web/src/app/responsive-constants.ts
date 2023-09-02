@@ -1,0 +1,1 @@
+export const SidebarHiddenWidth = 1000;
