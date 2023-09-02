@@ -2,6 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FileQuery, SearchMode } from '../../filequery';
 import { Tag, SupabaseService } from '../../supabase.service';
+import { Observable, debounceTime, delay, fromEvent, map, startWith, timer } from 'rxjs';
+import { start } from 'repl';
 
 @Component({
   selector: 'app-searchinput',
@@ -11,6 +13,8 @@ import { Tag, SupabaseService } from '../../supabase.service';
 export class SearchinputComponent implements OnInit {
 
   @Input() query = new FileQuery([], [], "all", "all", true);
+
+  @Input() orientation: "horizontal" | "vertical" = "horizontal";
 
   @Output() queryChanged = new EventEmitter<FileQuery>();
 
@@ -33,6 +37,17 @@ export class SearchinputComponent implements OnInit {
         }
       }
     });
+    fromEvent(window, 'resize').pipe(startWith(undefined)).subscribe(() => this.calculateOrientation());
+  }
+
+  calculateOrientation() {
+    // ... I kinda just realized it's better always vertical?
+    this.orientation = "vertical";
+    // if (window.innerWidth < 1366) {
+    //   this.orientation = "vertical";
+    // } else {
+    //   this.orientation = "horizontal";
+    // }
   }
 
   emitQueryChange(includeTags: number[], excludeTags: number[], includeMode: SearchMode, excludeMode: SearchMode) {

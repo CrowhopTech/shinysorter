@@ -1,10 +1,24 @@
 .tags-cols
     .tag-col
-        min-width: 275px
-        max-width: 275px
         padding-bottom: 20px
         margin-bottom: 4px
+        overflow-y: auto
+        direction: rtl
+        padding-left: 0.75rem
+        padding-right: 0.75rem
+        min-width: 275px
+        max-width: 275px
+        flex-grow: 1
+        &.horizontal
+            max-height: 100%
+        &.vertical
+            height: 33vh
+            max-height: 33vh
 
 .spacer
-    min-width: 825px
-    max-width: 825px
+    &.vertical
+        min-width: 275px
+        // No max width
+    &.horizontal
+        min-width: 825px
+        max-width: 825px

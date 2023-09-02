@@ -1,4 +1,11 @@
 <mat-toolbar color="primary">
+    <div class="flex flex-row" *ngIf="sidebarButtonVisible">
+        <button mat-icon-button (click)="onSidebarClick.emit()">
+            <mat-icon color="accent" [class.deselected]="currentMode!=='Tagging'">menu</mat-icon>
+        </button>
+        <div class="w-4"></div>
+    </div>
+
     <h1 class="pt-4">Shiny Sorter</h1>
 
     <div class="w-6"></div>
@@ -14,7 +21,7 @@
     </button>
 
     <div class="w-6"></div>
-    <h1 *ngIf="currentMode==='Searching'" class="pt-4">Image Search</h1>
-    <h1 *ngIf="currentMode==='Tagging'" class="pt-4">Image Tagging</h1>
-    <h1 *ngIf="currentMode==='Settings'" class="pt-4">Settings</h1>
+    <h1 *ngIf="currentMode==='Searching'" class="toolbar-title pt-4">Image Search</h1>
+    <h1 *ngIf="currentMode==='Tagging'" class="toolbar-title pt-4">Image Tagging</h1>
+    <h1 *ngIf="currentMode==='Settings'" class="toolbar-title pt-4">Settings</h1>
 </mat-toolbar>

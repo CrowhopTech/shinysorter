@@ -2,44 +2,52 @@
     <h1 *ngIf="tagsErr === undefined && allTags && allTags.length == 0">No tags present! Add them in Settings</h1>
     <h1 *ngIf="tagsErr !== undefined">Failed to get tags: <code>{{ tagsErr }}</code></h1>
 </div>
-<div class="tags-cols flex flex-row pb-1.5 max-h-full" *ngIf="allTags && allTags.length > 0">
-    <div class="tag-col px-3 flex-grow overflow-y-auto max-h-full">
-        <ul>
-            <li *ngFor="let tag of query.getUnusedTags(allTags)">
-                <app-tagquery tag="{{tag.name}}" [addVisible]="true" [removeVisible]="true"
-                    (addClicked)="tagAction('include', tag.id)" (removeClicked)="tagAction('exclude', tag.id)">
-                </app-tagquery>
-            </li>
-        </ul>
+<div class="tags-cols flex pb-1.5 max-h-full" [class.flex-row]="orientation == 'horizontal'"
+    [class.flex-col]="orientation == 'vertical'" *ngIf="allTags && allTags.length > 0">
+    <div class="tag-col" [class.horizontal]="orientation == 'horizontal'" [class.vertical]="orientation == 'vertical'">
+        <div style="direction:ltr">
+            <h2 class="flex-grow-0">Tag Options</h2>
+            <ul>
+                <li *ngFor=" let tag of query.getUnusedTags(allTags)">
+                    <app-tagquery tag="{{tag.name}}" [addVisible]="true" [removeVisible]="true"
+                        (addClicked)="tagAction('include', tag.id)" (removeClicked)="tagAction('exclude', tag.id)">
+                    </app-tagquery>
+                </li>
+            </ul>
+        </div>
     </div>
     <mat-divider vertical="true" class="flex-grow-0"></mat-divider>
-    <div class="tag-col px-3 flex-grow overflow-y-auto max-h-full">
-        <div class="flex flex-row">
-            <h2 class="flex-grow-0">Require...</h2>
-            <app-exclusivetoggle class="flex-grow" [value]="query.includeMode"
-                (valueChanged)="emitQueryChange(query.includeTags, query.excludeTags, $event, query.excludeMode)">
-            </app-exclusivetoggle>
+    <div class="tag-col" [class.horizontal]="orientation == 'horizontal'" [class.vertical]="orientation == 'vertical'">
+        <div style="direction:ltr">
+            <div class="flex flex-row">
+                <h2 class="flex-grow-0">Require...</h2>
+                <app-exclusivetoggle class="flex-grow" [value]="query.includeMode"
+                    (valueChanged)="emitQueryChange(query.includeTags, query.excludeTags, $event, query.excludeMode)">
+                </app-exclusivetoggle>
+            </div>
+            <ul>
+                <li *ngFor="let tag of query.getIncludedTags(allTags)">
+                    <app-tagquery tag="{{tag.name}}" [addVisible]="false" [removeVisible]="true"
+                        (removeClicked)="tagAction('neutral', tag.id)"></app-tagquery>
+                </li>
+            </ul>
         </div>
-        <ul>
-            <li *ngFor="let tag of query.getIncludedTags(allTags)">
-                <app-tagquery tag="{{tag.name}}" [addVisible]="false" [removeVisible]="true"
-                    (removeClicked)="tagAction('neutral', tag.id)"></app-tagquery>
-            </li>
-        </ul>
     </div>
     <mat-divider vertical="true" class="flex-grow-0"></mat-divider>
-    <div class="tag-col px-3 flex-grow overflow-y-auto max-h-full">
-        <div class="flex flex-row">
-            <h2 class="flex-grow-0">But exclude...</h2>
-            <app-exclusivetoggle class="flex-grow" [value]="query.excludeMode"
-                (valueChanged)="emitQueryChange(query.includeTags, query.excludeTags, query.includeMode, $event)">
-            </app-exclusivetoggle>
+    <div class="tag-col" [class.horizontal]="orientation == 'horizontal'" [class.vertical]="orientation == 'vertical'">
+        <div style="direction:ltr">
+            <div class="flex flex-row">
+                <h2 class="flex-grow-0">But exclude...</h2>
+                <app-exclusivetoggle class="flex-grow" [value]="query.excludeMode"
+                    (valueChanged)="emitQueryChange(query.includeTags, query.excludeTags, query.includeMode, $event)">
+                </app-exclusivetoggle>
+            </div>
+            <ul>
+                <li *ngFor="let tag of query.getExcludedTags(allTags)">
+                    <app-tagquery tag="{{tag.name}}" [addVisible]="true" [removeVisible]="false"
+                        (addClicked)="tagAction('neutral', tag.id)"></app-tagquery>
+                </li>
+            </ul>
         </div>
-        <ul>
-            <li *ngFor="let tag of query.getExcludedTags(allTags)">
-                <app-tagquery tag="{{tag.name}}" [addVisible]="true" [removeVisible]="false"
-                    (addClicked)="tagAction('neutral', tag.id)"></app-tagquery>
-            </li>
-        </ul>
     </div>
 </div>

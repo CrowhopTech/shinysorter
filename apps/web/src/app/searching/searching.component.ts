@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { distinctUntilChanged, filter, fromEvent, map } from 'rxjs';
+import { distinctUntilChanged, filter, fromEvent, map, startWith } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
 import { SupabaseService } from '../supabase.service';
 import { QueryManagerService } from './querymanager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationDialogComponent } from '../confirmationdialog.component';
-
+import { SidebarHiddenWidth } from '../responsive-constants';
 @Component({
   selector: 'app-searching',
   templateUrl: './searching.component.html',
@@ -15,11 +15,17 @@ import { ConfirmationDialogComponent } from '../confirmationdialog.component';
 })
 export class SearchingComponent implements OnInit {
   viewerInfoOpen: boolean = false;
+  windowIsSmall: boolean = false;
+  sidebarToggled: boolean = false;
 
   constructor(public router: Router, public queryManager: QueryManagerService, public apiUtility: APIUtilityService, public supaService: SupabaseService, public dialog: MatDialog, public snackbar: MatSnackBar) { }
 
   get currentFileTags(): number[] | undefined {
     return this.queryManager.viewingFile?.filetags.map((t: any) => t.tagid);
+  }
+
+  get sidebarVisible(): boolean {
+    return this.windowIsSmall ? this.sidebarToggled : true;
   }
 
   async ngOnInit(): Promise<void> {
@@ -34,10 +40,16 @@ export class SearchingComponent implements OnInit {
       subscribe((_: KeyboardEvent) => {
         this.queryManager.viewClose();
       });
+    fromEvent(window, 'resize').pipe(startWith(undefined)).subscribe(() => this.calculateSize());
     await Promise.all([
       this.queryManager.ngOnInit(),
       this.apiUtility.updateTagCache()
     ]);
+
+  }
+
+  calculateSize() {
+    this.windowIsSmall = window.innerWidth < SidebarHiddenWidth;
   }
 
   deleteClick() {
