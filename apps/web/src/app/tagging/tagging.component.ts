@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, fromEvent, startWith } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
 import { QuestionManagerService } from './questionmanager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmationdialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SplitComponent } from 'angular-split';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-tagging',
@@ -19,7 +21,10 @@ export class TaggingComponent implements OnInit {
 
   queryParamSub: Subscription | undefined = undefined;
 
-  constructor(public router: Router, private route: ActivatedRoute, public apiUtility: APIUtilityService, public questionManager: QuestionManagerService, public dialog: MatDialog, public snackbar: MatSnackBar) { }
+  windowIsSmall: boolean = false;
+  @ViewChild("questionarea") questionArea: ElementRef<SplitComponent> | undefined;
+
+  constructor(public router: Router, private route: ActivatedRoute, public apiUtility: APIUtilityService, public questionManager: QuestionManagerService, public dialog: MatDialog, public snackbar: MatSnackBar, private breakpointObserver: BreakpointObserver) { }
 
   pastelColorForText(text: string | undefined): string {
     if (!text) {
@@ -118,5 +123,6 @@ export class TaggingComponent implements OnInit {
 
       this.router.navigate(["/tag"], { queryParams: { "image": untaggedFile.id } });
     });
+    this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).subscribe(result => this.windowIsSmall = result.matches);
   };
 }

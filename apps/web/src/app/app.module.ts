@@ -51,6 +51,7 @@ import { TagChipComponent } from './tag-chip/tag-chip.component';
 import { AppService } from './app.service';
 import { TOKEN } from './app.service';
 import { ConfirmationDialogComponent } from './confirmationdialog.component';
+import { AngularSplitModule } from 'angular-split';
 
 // Use this to load config values **at runtime**! See the comment values around this file for a full example (mainly see providers in the module)
 
@@ -93,7 +94,7 @@ export function initApp(appService: AppService) {
     QuestionDeleteDialogComponent,
     QuestionReorderDialogComponent,
     TagChipComponent,
-    ConfirmationDialogComponent,
+    ConfirmationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -126,6 +127,7 @@ export function initApp(appService: AppService) {
     FileSaverModule,
     FormsModule,
     ReactiveFormsModule,
+    AngularSplitModule,
     // ApiModule.forRoot(getApiConfig)
   ],
   providers: [

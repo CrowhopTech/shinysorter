@@ -1,5 +1,5 @@
 <!-- Outer div necessary to keep everything nicely vertically aligned -->
-<div class="h-screen flex flex-col">
+<div class="fixed left-0 right-0 top-0 bottom-0 flex flex-col">
     <app-toolbar class="flex-0" (onSearchClick)="toolbarNavigate('/search')"
         (onSettingsClick)="toolbarNavigate('/settings')" [currentMode]="'Tagging'">
     </app-toolbar>
@@ -15,8 +15,10 @@
         <h1>No more files to tag!</h1>
         <h2>Check back later when more files have been uploaded</h2>
     </div>
-    <mat-sidenav-container class="flex-grow" *ngIf="questionManager.currentFileID !== undefined">
-        <mat-sidenav opened="true" mode="side" class="sidebar w-fit p-3 max-w-lg">
+    <as-split [direction]="windowIsSmall ? 'vertical' : 'horizontal'"
+        *ngIf="questionManager.currentFileID !== undefined" unit="pixel">
+        <as-split-area class="p-3 w-fit" minSize="100" size="512" [lockSize]="!windowIsSmall" #questionarea
+            [order]="windowIsSmall ? 2 : 0">
             <h1>Questions and tag selection</h1>
             <app-tag-chip [tagIDs]="questionManager.selectedTags"></app-tag-chip>
             <i *ngIf="questionManager.selectedTags.length == 0">No tags selected yet</i>
@@ -48,9 +50,9 @@
                     Skip This Image
                 </button>
             </div>
-        </mat-sidenav>
-        <mat-sidenav-content class="p-3">
+        </as-split-area>
+        <as-split-area size="*" minSize="100" order="1">
             <app-fileviewer [fileID]="questionManager.currentFileID"></app-fileviewer>
-        </mat-sidenav-content>
-    </mat-sidenav-container>
+        </as-split-area>
+    </as-split>
 </div>
