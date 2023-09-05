@@ -1,12 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, fromEvent, startWith } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
 import { QuestionManagerService } from './questionmanager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmationdialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SplitComponent } from 'angular-split';
 
 @Component({
   selector: 'app-tagging',
@@ -18,6 +19,9 @@ export class TaggingComponent implements OnInit {
   navigateError: string | undefined = undefined;
 
   queryParamSub: Subscription | undefined = undefined;
+  windowIsSmall: boolean = false;
+
+  @ViewChild("questionarea") questionArea: ElementRef<SplitComponent> | undefined;
 
   constructor(public router: Router, private route: ActivatedRoute, public apiUtility: APIUtilityService, public questionManager: QuestionManagerService, public dialog: MatDialog, public snackbar: MatSnackBar) { }
 
@@ -80,6 +84,10 @@ export class TaggingComponent implements OnInit {
     this.questionManager.unsubscribe();
   }
 
+  calculateSize() {
+    this.windowIsSmall = window.innerWidth < 768;
+  }
+
   ngOnInit(): void {
     this.queryParamSub = this.route.queryParamMap.subscribe(async params => {
       const image = params.get("image");
@@ -118,5 +126,6 @@ export class TaggingComponent implements OnInit {
 
       this.router.navigate(["/tag"], { queryParams: { "image": untaggedFile.id } });
     });
+    fromEvent(window, 'resize').pipe(startWith(undefined)).subscribe(() => this.calculateSize());
   };
 }
