@@ -269,8 +269,11 @@ export class SupabaseService {
     patchTag(patch?: TagPatch) {
         return this.supabase.from("tags").update(patch);
     }
-    deleteTag(tagID: number) {
-        return this.supabase.from("tags").delete().eq("id", tagID);
+
+    async deleteTag(tagID: number) {
+        await this.supabase.from("questionoptions").delete().eq("tagid", tagID); // Delete this tag from any questions that use it
+
+        return this.supabase.from("tags").delete().eq("id", tagID); // Delete the tag itself
     }
 
     listQuestions() {
