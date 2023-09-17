@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Edit Tag</h2>
+<mat-dialog-content>
+    <form class="flex flex-col overflow-hidden">
+        <mat-form-field appearance="fill">
+            <mat-label>Tag Name</mat-label>
+            <input matInput [(ngModel)]="tagCopy.name" name="tagName" #tagName="ngModel" required
+                placeholder="Ex. 'Rose'">
+            <mat-error *ngIf="tagName.invalid && (tagName.dirty || tagName.touched)">
+                Tag Name is <strong>required</strong>
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Tag Description</mat-label>
+            <div class="flex flex-row">
+                <input matInput [(ngModel)]="tagCopy.description" name="tagDescription" #tagDescription="ngModel">
+            </div>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="null" cdkFocusInitial>Cancel</button>
+    <button mat-button [mat-dialog-close]="tagCopy">Save</button>
+</mat-dialog-actions>

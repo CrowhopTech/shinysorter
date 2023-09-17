@@ -19,24 +19,24 @@
             <mat-icon>close</mat-icon>
         </button>
         <div id="info-bar" [class.viewer-open]="viewerInfoOpen" class="fixed w-full text-white">
-            <div class="relative max-w-full p-3 flex flex-col">
-                <div class="flex flex-row">
-                    <div class="w-40"><!--Spacer to go past buttons--></div>
-                    <h1>{{ queryManager.viewingFile.filename }}</h1>
-                </div>
-                <div *ngIf="queryManager.viewingFile != undefined">
-                    <app-tag-chip [tagIDs]="currentFileTags"></app-tag-chip>
-                </div>
+            <h1 class="absolute left-[11rem] right-12 top-3 text-ellipsis break-all whitespace-nowrap overflow-hidden">
+                {{ queryManager.viewingFile.filename }}
+            </h1>
+            <div class="mt-16 mx-3 mb-3" *ngIf="queryManager.viewingFile != undefined">
+                <app-tag-chip [tagIDs]="currentFileTags"></app-tag-chip>
             </div>
         </div>
         <app-fileviewer class="w-full h-full text-white" [fileID]="queryManager.viewingFileID">
         </app-fileviewer>
     </div>
     <app-toolbar class="flex-0" (onTagClick)="router.navigate(['/tag'])"
-        (onSettingsClick)="router.navigate(['/settings'])" [currentMode]="'Searching'"></app-toolbar>
-    <mat-sidenav-container class=" flex-grow" disableClose>
-        <mat-sidenav opened="true" mode="side" class="sidebar min-w-fit w-fit p-3">
-            <app-searchinput (queryChanged)="this.queryManager.navigateToQuery($event)" [query]="queryManager.query">
+        (onSettingsClick)="router.navigate(['/settings'])" (onSidebarClick)="sidebarToggled = !sidebarToggled"
+        [sidebarButtonVisible]="windowIsSmall" [currentMode]="'Searching'"></app-toolbar>
+    <mat-sidenav-container class="flex-grow" disableClose>
+        <mat-sidenav [opened]="sidebarVisible" [mode]="windowIsSmall ? 'over' : 'side'"
+            class="sidebar min-w-fit w-fit pr-3 pb-3 pt-3">
+            <app-searchinput (queryChanged)="this.queryManager.navigateToQuery($event)" [query]="queryManager.query"
+                orientation="vertical">
             </app-searchinput>
             <mat-divider></mat-divider>
         </mat-sidenav>

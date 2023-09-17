@@ -259,7 +259,7 @@ export class SupabaseService {
     }
 
     listTags() {
-        return this.supabase.from<"tags", Tag>("tags").select("*");
+        return this.supabase.from<"tags", Tag>("tags").select("*").order("id");
     }
 
     createTag(toCreate: TagCreate) {

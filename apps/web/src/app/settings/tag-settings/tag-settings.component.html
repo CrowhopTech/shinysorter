@@ -1,17 +1,21 @@
 <h1>Edit tags</h1>
 <mat-spinner *ngIf="tags == undefined">
 </mat-spinner>
-<div *ngIf="tags != undefined">
-    <div class="flex flex-row flex-wrap">
-        <div *ngFor="let tag of tags">
-            <div class="card">
-                <app-tag-tile [tag]="tag" (refetchRequired)="refetchTags()"></app-tag-tile>
+<div *ngIf="tags != undefined" class="flex flex-col">
+    <div *ngFor="let tag of tags" class="flex flex-row p-2 items-center tag-row">
+        <button mat-icon-button class="button-hover" (click)="editTag(tag)">
+            <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button class="button-hover" (click)="deleteTag(tag)">
+            <mat-icon>delete</mat-icon>
+        </button>
+        <div class="flex flex-col overflow-hidden">
+            <div class="w-fit py-1 px-3 text-base rounded-full mb-1.5 justify-self-end"
+                [style.background-color]="pastelColorForText(tag.name)">
+                <b>{{ tag.name }}</b>
             </div>
-        </div>
-        <div>
-            <div class="card">
-                <app-tag-create-tile (refetchRequired)="refetchTags()"></app-tag-create-tile>
-            </div>
+            <div *ngIf="tag.description" class="overflow-ellipsis">{{ tag.description }}</div>
+            <div *ngIf="!tag.description"><i>No description</i></div>
         </div>
     </div>
 </div>
