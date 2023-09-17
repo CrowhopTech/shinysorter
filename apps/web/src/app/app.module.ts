@@ -52,6 +52,7 @@ import { AppService } from './app.service';
 import { TOKEN } from './app.service';
 import { ConfirmationDialogComponent } from './confirmationdialog.component';
 import { AngularSplitModule } from 'angular-split';
+import { TagEditDialogComponent } from './settings/tag-settings/tag-edit-dialog/tag-edit-dialog.component';
 
 // Use this to load config values **at runtime**! See the comment values around this file for a full example (mainly see providers in the module)
 
@@ -87,6 +88,7 @@ export function initApp(appService: AppService) {
     QuestionSettingsComponent,
     TagTileComponent,
     TagCreateTileComponent,
+    TagEditDialogComponent,
     TagDeleteDialogComponent,
     QuestionTileComponent,
     QuestionEditDialogComponent,
