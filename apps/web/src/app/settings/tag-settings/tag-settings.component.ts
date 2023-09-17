@@ -85,4 +85,22 @@ export class TagSettingsComponent implements OnInit {
       this.refetchTags();
     });
   }
+
+  createTag() {
+    this.dialog.open(TagEditDialogComponent, {
+      data: {
+        tag: null,
+      }
+    }).afterClosed().subscribe(async (result: Tag | null) => {
+      if (result == null) {
+        return;
+      }
+
+      const { error } = await this.supaService.createTag({ name: result.name, description: result.description });
+      if (error) {
+        this.snackbar.open(`Failed to create tag ${result.name}: ${error.message}`, undefined, { duration: 7500 });
+      }
+      this.refetchTags();
+    });
+  }
 }

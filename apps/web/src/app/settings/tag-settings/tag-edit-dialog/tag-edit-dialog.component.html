@@ -1,4 +1,5 @@
-<h2 mat-dialog-title>Edit Tag</h2>
+<h2 *ngIf="isCreate" mat-dialog-title>New Tag</h2>
+<h2 *ngIf="!isCreate" mat-dialog-title>Edit Tag</h2>
 <mat-dialog-content>
     <form class="flex flex-col overflow-hidden">
         <mat-form-field appearance="fill">
@@ -19,5 +20,6 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-button [mat-dialog-close]="null" cdkFocusInitial>Cancel</button>
-    <button mat-button [mat-dialog-close]="tagCopy">Save</button>
+    <button *ngIf="isCreate" mat-button [mat-dialog-close]="tagCopy">Create</button>
+    <button *ngIf="!isCreate" mat-button [mat-dialog-close]="tagCopy">Save</button>
 </mat-dialog-actions>

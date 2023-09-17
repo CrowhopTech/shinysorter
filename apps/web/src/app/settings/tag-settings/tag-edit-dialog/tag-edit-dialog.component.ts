@@ -16,14 +16,25 @@ import { QuestionOptionCreate, QuestionPatch, QuestionWithOptions, SupabaseServi
 export class TagEditDialogComponent implements OnInit {
 
   public tagCopy: Tag;
+  public isCreate: boolean;
 
-  constructor(public dialogRef: MatDialogRef<TagEditDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { tag: Tag; }) {
-    this.tagCopy = {
-      id: data.tag.id,
-      name: data.tag.name,
-      description: data.tag.description,
-      created_at: data.tag.created_at,
-    };
+  constructor(public dialogRef: MatDialogRef<TagEditDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { tag: Tag | null; }) {
+    this.isCreate = data.tag == null;
+    if (data.tag != null) {
+      this.tagCopy = {
+        id: data.tag.id,
+        name: data.tag.name,
+        description: data.tag.description,
+        created_at: data.tag.created_at,
+      };
+    } else {
+      this.tagCopy = {
+        id: -1,
+        name: '',
+        description: '',
+        created_at: '',
+      };
+    }
   }
 
   ngOnInit(): void { }
