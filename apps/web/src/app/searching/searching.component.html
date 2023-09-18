@@ -28,6 +28,14 @@
         </div>
         <app-fileviewer class="w-full h-full text-white" [fileID]="queryManager.viewingFileID">
         </app-fileviewer>
+        <button *ngIf="queryManager.viewCanGoBack()" class="absolute left-0 top-0 h-full w-8 text-white"
+            (click)="queryManager.viewLastFile()">
+            <b><mat-icon>chevron_left</mat-icon></b>
+        </button>
+        <button *ngIf="queryManager.viewCanGoForward()" class="absolute right-0 top-0 h-full w-8 text-white"
+            (click)="queryManager.viewNextFile()">
+            <b><mat-icon>chevron_right</mat-icon></b>
+        </button>
     </div>
     <app-toolbar class="flex-0" (onTagClick)="router.navigate(['/tag'])"
         (onSettingsClick)="router.navigate(['/settings'])" (onSidebarClick)="sidebarToggled = !sidebarToggled"
