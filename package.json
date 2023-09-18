@@ -33,6 +33,7 @@
     "md5-file": "^5.0.0",
     "mmmagic": "https://github.com/CrowhopTech/mmmagic/tarball/543a289621749c8bcbbbf9d50c4f2171a23dc27d",
     "morgan": "^1.10.0",
+    "ng-swipe": "^2.0.1",
     "ngx-filesaver": "^14.0.0",
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",

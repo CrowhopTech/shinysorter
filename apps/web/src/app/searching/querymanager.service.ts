@@ -266,6 +266,7 @@ export class QueryManagerService {
 
       if (!newQuery.equals(this._query) || viewingFile != this._viewingFileID) {
         this.paramsChanged.emit();
+        this.listFileCall();
       }
       this._query = newQuery;
       this._viewingFileID = viewingFile ? viewingFile : -1;
@@ -275,7 +276,6 @@ export class QueryManagerService {
           this._viewingFile = file.data as TaggedFileEntry;
         }
       }
-      this.listFileCall();
     });
 
   }

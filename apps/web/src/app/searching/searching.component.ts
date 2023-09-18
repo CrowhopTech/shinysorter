@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { distinctUntilChanged, filter, fromEvent, map, startWith } from 'rxjs';
 import { APIUtilityService } from '../apiutility.service';
-import { SupabaseService } from '../supabase.service';
+import { SupabaseService, TaggedFileEntry } from '../supabase.service';
 import { QueryManagerService } from './querymanager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -68,5 +68,28 @@ export class SearchingComponent implements OnInit {
         }
       }
     });
+  }
+
+  fileTrackFunc(_: number, item: TaggedFileEntry) {
+    return item.id;
+  }
+
+  onImageViewerSwipeEnd($event: any) {
+    if ($event.direction == 'y') {
+      return;
+    }
+
+    if ($event.distance > 0) {
+      // Swiping right
+      if (this.queryManager.viewCanGoBack()) {
+        this.queryManager.viewLastFile();
+      }
+    }
+    else {
+      // Swiping left
+      if (this.queryManager.viewCanGoForward()) {
+        this.queryManager.viewNextFile();
+      }
+    }
   }
 }

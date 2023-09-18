@@ -1,7 +1,7 @@
 <!-- Outer div necessary to keep everything nicely vertically aligned -->
 <div class="h-screen flex flex-col">
-    <div id="image-viewer-root" class="w-full h-full fixed"
-        *ngIf="queryManager.viewingFileID != -1 && queryManager.viewingFile">
+    <div ngSwipe id="image-viewer-root" class="w-full h-full fixed"
+        *ngIf="queryManager.viewingFileID != -1 && queryManager.viewingFile" (swipeEnd)="onImageViewerSwipeEnd($event)">
         <div class="absolute left-0 top-0 w-full h-fit flex flex-row p-1 space-x-2">
             <button mat-icon-button disableRipple id="infoButton" class="viewer-button"
                 (click)="viewerInfoOpen = !viewerInfoOpen">
@@ -28,13 +28,15 @@
         </div>
         <app-fileviewer class="w-full h-full text-white" [fileID]="queryManager.viewingFileID">
         </app-fileviewer>
-        <button *ngIf="queryManager.viewCanGoBack()" class="absolute left-0 top-0 h-full w-8 text-white"
+        <button *ngIf="queryManager.viewCanGoBack()"
+            class="absolute left-0 top-0 h-full w-8 text-white bg-black bg-opacity-40"
             (click)="queryManager.viewLastFile()">
-            <b><mat-icon>chevron_left</mat-icon></b>
+            <mat-icon class="scale-[200%]">chevron_left</mat-icon>
         </button>
-        <button *ngIf="queryManager.viewCanGoForward()" class="absolute right-0 top-0 h-full w-8 text-white"
+        <button *ngIf="queryManager.viewCanGoForward()"
+            class="absolute right-0 top-0 h-full w-8 text-white bg-black bg-opacity-40"
             (click)="queryManager.viewNextFile()">
-            <b><mat-icon>chevron_right</mat-icon></b>
+            <mat-icon class="scale-[200%]">chevron_right</mat-icon>
         </button>
     </div>
     <app-toolbar class="flex-0" (onTagClick)="router.navigate(['/tag'])"
@@ -66,7 +68,7 @@
                 Failed to get results: <code>{{ queryManager.searchError }}</code>
             </h2>
             <mat-grid-list *ngIf="queryManager.searchResult != undefined" cols="4" rowHeight="256">
-                <mat-grid-tile *ngFor="let file of queryManager.searchResult">
+                <mat-grid-tile *ngFor="let file of queryManager.searchResult; trackBy: fileTrackFunc">
                     <img class="h-full max-h-72 m-0 object-scale-down hover:scale-95 transition-all cursor-pointer"
                         [src]="supaService.thumbContentsAddress(file.storageID)"
                         (click)="queryManager.viewFile(file.id)" />
