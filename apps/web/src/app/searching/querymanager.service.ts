@@ -139,6 +139,19 @@ export class QueryManagerService {
     return this._searchResult.findIndex(f => f.id == this._viewingFileID) > 0;
   }
 
+  public viewCanGoForward(): boolean {
+    if (!this._searchResult) {
+      return false;
+    }
+    const idx = this._searchResult.findIndex(f => f.id == this._viewingFileID);
+
+    if (idx == -1) {
+      return false;
+    }
+    // Index = -1, not found.
+    return idx < this._searchResult.length - 1;
+  }
+
   public viewNextFile() {
     // Get index of current file
     if (!this._searchResult) {
